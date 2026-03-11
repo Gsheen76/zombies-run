@@ -1,0 +1,429 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: linear-gradient(to bottom, #87CEEB, #228B22);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+}
+
+#gameContainer {
+    position: relative;
+    background: #4a7c23;
+    border: 4px solid #2d5016;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#gameCanvas { display: block; cursor: pointer; }
+
+#topBar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, #5d4037, #3e2723);
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 3px solid #2d5016;
+}
+
+#sunCounter {
+    background: linear-gradient(to bottom, #fff59d, #ffc107);
+    border: 3px solid #ff8f00;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #5d4037;
+    min-width: 100px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+#coinCounter {
+    background: linear-gradient(to bottom, #ffd700, #daa520);
+    border: 3px solid #b8860b;
+    border-radius: 20px;
+    padding: 8px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #5d4037;
+    min-width: 80px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+#shovelBtn {
+    width: 50px; height: 60px;
+    background: linear-gradient(to bottom, #bcaaa4, #8d6e63);
+    border: 2px solid #5d4037;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-right: 10px;
+}
+
+#shovelBtn:hover { background: linear-gradient(to bottom, #a1887f, #6d4c41); }
+#shovelBtn.selected { border-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; }
+
+#plantCards { display: flex; gap: 5px; flex: 1; overflow-x: auto; }
+
+.plantCard {
+    min-width: 60px; height: 70px;
+    background: linear-gradient(to bottom, #c8e6c9, #81c784);
+    border: 2px solid #388e3c;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.plantCard:hover { transform: scale(1.05); background: linear-gradient(to bottom, #a5d6a7, #66bb6a); }
+.plantCard.selected { border-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; }
+.plantCard.locked { background: linear-gradient(to bottom, #9e9e9e, #757575); cursor: not-allowed; }
+.plantCard.locked::after { content: '🔒'; position: absolute; font-size: 20px; }
+.plantCard .cooldownOverlay {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+}
+.plantCard .cooldownText {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 10;
+}
+.plantCard .icon { position: relative; z-index: 5; }
+.plantCard .cost {
+    position: absolute;
+    bottom: 2px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #2e7d32;
+    background: rgba(255,255,255,0.7);
+    padding: 1px 5px;
+    border-radius: 8px;
+    z-index: 5;
+}
+
+#controlBtns { display: flex; gap: 5px; margin-left: 10px; }
+
+.ctrlBtn {
+    width: 40px; height: 40px;
+    background: linear-gradient(to bottom, #607d8b, #455a64);
+    border: 2px solid #37474f;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+}
+
+.ctrlBtn:hover { transform: scale(1.1); }
+.ctrlBtn.active { background: linear-gradient(to bottom, #ff9800, #f57c00); border-color: #e65100; }
+
+#waveInfo {
+    position: absolute;
+    top: 90px; right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+#levelInfo {
+    position: absolute;
+    top: 90px; left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+/* 主菜单背景 - 森林主题 */
+#mainMenu {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, #0d3320 0%, #1a5a3a 30%, #0d2818 70%, #051a0f 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+#mainMenu::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(34, 139, 34, 0.3) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+#mainMenu h1 {
+    font-size: 48px;
+    color: #FFD700;
+    text-shadow: 3px 3px 0 #8B4513;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.menuBtn {
+    width: 250px;
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+    border: 3px solid #1B5E20;
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+.menuBtn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+
+/* 面板样式 - 各模块独特背景 */
+#levelSelectPanel, #settingsPanel, #gardenPanel, #shopPanel, #almanacPanel, #plantSelectPanel, #victoryPanel {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    display: none;
+    z-index: 250;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 关卡选择 - 地图主题 */
+#levelSelectPanel { 
+    background: linear-gradient(180deg, #2d1810 0%, #4a2c17 50%, #1a0f08 100%); 
+    border: 3px solid #8B4513; 
+}
+
+/* 设置面板 - 科技主题 */
+#settingsPanel { 
+    background: linear-gradient(180deg, #1a237e 0%, #283593 50%, #0d1442 100%); 
+    border: 3px solid #3f51b5; 
+}
+
+/* 花园面板 - 自然主题 */
+#gardenPanel { 
+    background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 50%, #0d3310 100%); 
+    border: 3px solid #4caf50; 
+}
+
+/* 商店面板 - 神秘主题 */
+#shopPanel { 
+    background: linear-gradient(180deg, #4a148c 0%, #6a1b9a 50%, #2a0a4c 100%); 
+    border: 3px solid #9c27b0; 
+}
+
+/* 图鉴面板 - 古籍主题 */
+#almanacPanel { 
+    background: linear-gradient(180deg, #bf360c 0%, #e64a19 50%, #5c1a06 100%); 
+    border: 3px solid #ff5722; 
+}
+
+/* 植物选择面板 - 策略主题 */
+#plantSelectPanel { 
+    background: linear-gradient(180deg, #004d40 0%, #00695c 50%, #00201a 100%); 
+    border: 3px solid #009688; 
+}
+
+/* 胜利面板 - 庆典主题 */
+#victoryPanel { 
+    background: linear-gradient(180deg, #f57f17 0%, #ff9800 50%, #e65100 100%); 
+    border: 3px solid #ffc107; 
+}
+
+#levelSelectPanel h2, #settingsPanel h2, #gardenPanel h2, #shopPanel h2, #almanacPanel h2, #plantSelectPanel h2, #victoryPanel h2 { 
+    text-align: center; margin-bottom: 20px; color: #FFD700; 
+}
+
+.levelGrid { display: grid; grid-template-columns: repeat(5, 80px); gap: 15px; margin-top: 20px; }
+
+.levelBtn {
+    width: 80px; height: 80px;
+    background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+    border: 3px solid #1B5E20;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+}
+.levelBtn:hover { transform: scale(1.1); }
+.levelBtn.locked { background: linear-gradient(to bottom, #616161, #424242); cursor: not-allowed; }
+.levelBtn.locked::after { content: '🔒'; font-size: 16px; }
+.levelBtn.completed { background: linear-gradient(to bottom, #FFD700, #DAA520); border-color: #B8860B; }
+.levelBtn .stars { font-size: 12px; margin-top: 2px; }
+
+.settingRow { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
+.settingRow label { font-size: 16px; }
+.settingRow input[type="range"] { width: 150px; }
+
+.closeBtn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#pauseMenu {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 40px 50px;
+    border-radius: 15px;
+    display: none;
+    z-index: 200;
+    text-align: center;
+}
+#pauseMenu h2 { font-size: 32px; margin-bottom: 20px; }
+
+#gameMenu {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 40px 60px;
+    border-radius: 20px;
+    text-align: center;
+    display: none;
+    z-index: 100;
+}
+#gameMenu h1 { font-size: 36px; margin-bottom: 20px; }
+#gameMenu p { font-size: 18px; margin-bottom: 20px; }
+#gameMenu button { background: linear-gradient(to bottom, #4caf50, #2e7d32); color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin: 5px; }
+
+#newPlantReward {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(to bottom, #2d5016, #1a472a);
+    border: 4px solid #FFD700;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    display: none;
+    z-index: 300;
+}
+#newPlantReward h2 { color: #FFD700; font-size: 28px; margin-bottom: 20px; }
+#newPlantReward .plantIcon { font-size: 80px; margin: 20px 0; }
+#newPlantReward .plantName { color: #90EE90; font-size: 24px; margin-bottom: 20px; }
+#newPlantReward button { background: #FFD700; color: #1a472a; border: none; padding: 15px 40px; font-size: 18px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+/* 花园样式 */
+#gardenPanel .gardenGrid { display: grid; grid-template-columns: repeat(5, 80px); gap: 10px; margin-top: 20px; }
+.gardenSlot {
+    width: 80px; height: 80px;
+    background: linear-gradient(to bottom, #5d4037, #3e2723);
+    border: 2px solid #8B4513;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.gardenSlot:hover { border-color: #FFD700; }
+.gardenSlot.hasPlant { background: linear-gradient(to bottom, #4a7c23, #3d6b1c); }
+.gardenSlot .rarity { font-size: 10px; margin-top: 2px; }
+.gardenSlot .rarity.common { color: #90EE90; }
+.gardenSlot .rarity.rare { color: #4FC3F7; }
+.gardenSlot .rarity.epic { color: #CE93D8; }
+
+/* 商店样式 */
+#shopPanel .shopGrid { display: grid; grid-template-columns: repeat(3, 150px); gap: 15px; margin-top: 20px; }
+.shopItem {
+    background: linear-gradient(to bottom, #4a5568, #2d3748);
+    border: 2px solid #718096;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+.shopItem:hover { border-color: #FFD700; }
+.shopItem.owned { border-color: #4CAF50; background: linear-gradient(to bottom, #2d5016, #1a472a); }
+.shopItem.active { border-color: #FFD700; box-shadow: 0 0 10px #FFD700; }
+.shopItem .price { color: #FFD700; font-weight: bold; margin-top: 5px; }
+
+.seedCount { color: #90EE90; margin-top: 10px; text-align: center; }
+
+/* 图鉴样式 */
+#almanacPanel .almanacTabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.almanacTab {
+    padding: 10px 20px;
+    background: #4a5568;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+.almanacTab.active { background: #4CAF50; }
+#almanacPanel .almanacGrid { display: grid; grid-template-columns: repeat(4, 120px); gap: 15px; }
+.almanacItem {
+    background: #374151;
+    border: 2px solid #4B5563;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+.almanacItem.locked { background: #1F2937; border-color: #374151; }
+.almanacItem.locked .itemIcon { filter: brightness(0.3); }
+.almanacItem .itemIcon { font-size: 40px; }
+.almanacItem .itemName { font-size: 12px; margin-top: 5px; }
+.almanacDetail {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: #1F2937;
+    border-radius: 10px;
+}
+.almanacDetail .detailIcon { font-size: 60px; text-align: center; }
+.almanacDetail .detailName { font-size: 20px; color: #FFD700; text-align: center; margin: 10px 0; }
+.almanacDetail .detailDesc { font-size: 14px; color: #9CA3AF; line-height: 1.6; }
+
+/* 植物选择面板 */
+#plantSelectPanel .shopGrid { display: grid; grid-template-columns: repeat(4, 100px); gap: 15px; margin-top: 20px; }
+#plantSelectPanel .shopItem.selected { border-color: #FFD700; box-shadow: 0 0 15px #FFD700; }
