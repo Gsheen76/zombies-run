@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>植物大战僵尸</title>
+    <title>僵尸快跑 | Zombies Run</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
 </head>
+
 <body>
     <div id="gameContainer">
         <!-- 战斗界面 -->
@@ -38,7 +41,7 @@
                 <canvas id="menuCanvas"></canvas>
             </div>
             <div class="scene-content">
-                <h1 class="game-title">🌻 植物大战僵尸 🧟</h1>
+                <h1 class="game-title">🌻 僵尸快跑 🧟</h1>
                 <div class="menu-buttons">
                     <button class="menu-btn btn-adventure" onclick="game.showLevelSelect()">🎮 冒险模式</button>
                     <button class="menu-btn btn-garden" onclick="game.showGarden()">🌻 花园</button>
@@ -75,11 +78,13 @@
                 <div class="settings-box">
                     <div class="setting-item">
                         <label>背景音乐</label>
-                        <input type="range" id="bgmVolume" min="0" max="100" value="50" onchange="game.setBGMVolume(this.value)">
+                        <input type="range" id="bgmVolume" min="0" max="100" value="50"
+                            onchange="game.setBGMVolume(this.value)">
                     </div>
                     <div class="setting-item">
                         <label>音效</label>
-                        <input type="range" id="sfxVolume" min="0" max="100" value="30" onchange="game.setSFXVolume(this.value)">
+                        <input type="range" id="sfxVolume" min="0" max="100" value="30"
+                            onchange="game.setSFXVolume(this.value)">
                     </div>
                 </div>
                 <button class="back-btn" onclick="game.closeSettings()">← 返回主菜单</button>
@@ -173,7 +178,7 @@
 
         <!-- 弹窗层 -->
         <div id="gameMenu">
-            <h1>植物大战僵尸</h1>
+            <h1>僵尸快跑</h1>
             <p>保卫你的花园！</p>
             <button onclick="game.start()">开始游戏</button>
         </div>
@@ -194,4 +199,5 @@
     </div>
     <script src="scripts.js"></script>
 </body>
+
 </html>

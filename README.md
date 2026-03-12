@@ -1,31 +1,6 @@
-# 一、基础信息
+# 僵尸快跑 (Zombies Run)
 
-### 1. 存储位置
-
-```
-\\wsl.localhost\Ubuntu\home\sheen\pvz-game
-```
-
-### 2. 操作方式
-
-在vscode激活wsl后，使用opencode进行vibecoding。
-
-### 3. opencode对话记录
-
-```bash
-(base) sheen@MSI:/mnt/c/WINDOWS/system32$ opencode
-                                   ▄
-  █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
-  █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
-  ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
-
-  Session   植物大战僵尸游戏开发复刻
-  Continue  opencode -s ses_32916ff16ffe0xURI1pjmY3Jt6
-```
-
-# 二、内容
-
-### version-1.0
+## version-1.0
 
 - **版本介绍**
 基本初步完成功能预设，包含：6张植物卡牌，4种僵尸，1战斗场景，商店系统，金钱系统，花园系统，一个主界面，设置选项，难度选择，冒险模式。
@@ -38,14 +13,15 @@
 
 - **局内展示**
 1. 界面
-![502](基于opencode的pvz/file-20260311145315563.png)
+![502](assets/file-20260311145315563.png)
 2. 战斗系统
-![503](基于opencode的pvz/file-20260311145352553.png)
+![503](assets/file-20260311145352553.png)
 3. 花园系统
-![505](基于opencode的pvz/file-20260311163649625.png)
+![505](assets/file-20260311163649625.png)
 4. 商店系统
-![504](基于opencode的pvz/file-20260311163732754.png)
-### version-2.0
+![504](assets/file-20260311163732754.png)
+
+## version-2.0
 
 - **版本介绍**
 新增关卡、图鉴系统、3种植物、2种僵尸；优化商店、花园系统；优化战斗体验，有测试玩家反馈过难，简化难度。
@@ -62,11 +38,11 @@
 
 - **局内展示**
 1. 关卡系统
-![518](基于opencode的pvz/file-20260311163250586.png)
+![518](assets/file-20260311163250586.png)
 2. 战斗优化
-![517](基于opencode的pvz/file-20260311195504287.png)
+![517](assets/file-20260311195504287.png)
 
-### version-3.0（最终版）
+## version-3.0（最终版）
 
 - **版本介绍**
 新增4种僵尸、各场景独立音乐；优化商店、花园系统、战斗体验、主界面样式、全屏显示。
@@ -75,10 +51,10 @@
 1. 优化1
 优化主界面动画和按键，新增动态移动效果。
 2. 优化2
-在主界面的时候播放/home/sheen/pvz-game/主界面背景音乐.MP3
-在花园的时候播放/home/sheen/pvz-game/花园模式音乐.mp3
-在冒险模式选卡的时候播放/home/sheen/pvz-game/冒险模式选卡音乐.mp3
-在冒险模式战斗的时候播放/home/sheen/pvz-game/冒险模式战斗音乐.mp3
+在主界面的时候播放/home/sheen/pvz-game/main_background.mp3
+在花园的时候播放/home/sheen/pvz-game/garden.mp3
+在冒险模式选卡的时候播放/home/sheen/pvz-game/fight_prepare.mp3
+在冒险模式战斗的时候播放/home/sheen/pvz-game/fight.html
 严格完成上述逻辑。
 3. 优化3
 选卡界面不要显示后面的/7，只显示（已选植物数量/最多可选植物）；移除主界面豌豆子弹移动的效果。
@@ -87,12 +63,12 @@
 
 - **局内展示**
 1. 战斗优化
-![](基于opencode的pvz/file-20260312113750494.png)
+![](assets/file-20260312113750494.png)
 2. 主界面
-![](基于opencode的pvz/file-20260312152858824.png)
+![](assets/file-20260312152858824.png)
 3. 花园
-![](基于opencode的pvz/file-20260312152920861.png)
+![](assets/file-20260312152920861.png)
 4. 商店
-![](基于opencode的pvz/file-20260312152951570.png)
+![](assets/file-20260312152951570.png)
 5. 图鉴
-![](基于opencode的pvz/file-20260312153022046.png)
+![](assets/file-20260312153022046.png)
