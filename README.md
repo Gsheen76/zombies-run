@@ -38,7 +38,7 @@
 
 - **局内展示**
 1. 界面
-![502](assets/基于opencode的pvz/file-20260311145315563.png)
+![502](基于opencode的pvz/file-20260311145315563.png)
 2. 战斗系统
 ![503](assets/基于opencode的pvz/file-20260311145352553.png)
 3. 花园系统
