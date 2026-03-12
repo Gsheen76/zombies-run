@@ -200,6 +200,28 @@ class Game {
         this.initUI();
         this.setupEventListeners();
         this.initOrientationHandler();
+        this.preloadAllResources();
+        this.showStartScreen();
+    }
+
+    preloadAllResources() {
+        sound.init();
+        Object.values(sound.bgmFiles).forEach(src => {
+            if (src) {
+                const audio = new Audio();
+                audio.preload = 'auto';
+                audio.src = src;
+            }
+        });
+    }
+
+    showStartScreen() {
+        this.hideAllScreens();
+        document.getElementById('gameMenu').style.display = 'block';
+    }
+
+    start() {
+        sound.playBGM();
         this.showMainMenu();
     }
 
@@ -319,7 +341,19 @@ class Game {
 
     setupEventListeners() {
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
-        document.addEventListener('click', () => sound.init(), { once: true });
+        document.addEventListener('click', () => {
+            sound.init();
+            sound.playBGM();
+        }, { once: true });
+        document.addEventListener('touchstart', () => {
+            sound.init();
+            sound.playBGM();
+        }, { once: true });
+    }
+
+    initAudio() {
+        sound.init();
+        sound.playBGM();
     }
 
     showMainMenu() {
