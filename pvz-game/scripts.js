@@ -71,7 +71,11 @@ const ALL_ZOMBIES = {
     flag: { name: '旗帜僵尸', health: 200, speed: 0.025, damage: 100, desc: '大波僵尸的先头部队' },
     polevault: { name: '撑杆跳僵尸', health: 170, speed: 0.025, damage: 100, canJump: true, desc: '可以跳过第一个植物' },
     newspaper: { name: '读报僵尸', health: 300, speed: 0.015, damage: 100, desc: '报纸被打掉后会加速' },
-    screenDoor: { name: '铁栅门僵尸', health: 850, speed: 0.015, damage: 100, desc: '手持铁栅门，挡住正面攻击' }
+    screenDoor: { name: '铁栅门僵尸', health: 850, speed: 0.015, damage: 100, desc: '手持铁栅门，挡住正面攻击' },
+    football: { name: '橄榄球僵尸', health: 1400, speed: 0.03, damage: 100, desc: '装备橄榄球护具，速度极快' },
+    dancing: { name: '跳舞僵尸', health: 335, speed: 0.012, damage: 100, desc: '召唤伴舞僵尸一起前进' },
+    zomboni: { name: '冰车僵尸', health: 1350, speed: 0.02, damage: 100, desc: '驾驶冰车碾压植物' },
+    jack: { name: '小丑僵尸', health: 450, speed: 0.018, damage: 100, canBounce: true, desc: '用弹跳球反弹豌豆' }
 };
 
 const LEVELS = [
@@ -93,7 +97,13 @@ const SHOP_ITEMS = [
     { id: 'fire_sunflower', name: '火焰向日葵', price: 400, type: 'skin', plant: 'sunflower', desc: '燃烧的火焰外观' },
     { id: 'diamond_repeater', name: '钻石双发射手', price: 600, type: 'skin', plant: 'repeater', desc: '璀璨钻石造型' },
     { id: 'shadow_snowpea', name: '暗影寒冰射手', price: 450, type: 'skin', plant: 'snowpea', desc: '神秘的暗影外观' },
-    { id: 'garden_slot', name: '花园槽位', price: 200, type: 'slot', desc: '扩展花园容量' }
+    { id: 'purple_chomper', name: '毒液大嘴花', price: 550, type: 'skin', plant: 'chomper', desc: '剧毒紫色外观' },
+    { id: 'garden_slot', name: '花园槽位', price: 200, type: 'slot', maxBuy: 7, desc: '扩展花园容量' },
+    { id: 'seed_pack', name: '种子包', price: 100, type: 'seed', desc: '获得1个种子' },
+    { id: 'plant_slot', name: '植物槽位+1', price: 800, type: 'plantslot', maxBuy: 2, desc: '战斗时可多带1个植物' },
+    { id: 'zombie_football', name: '橄榄球僵尸皮肤', price: 600, type: 'zombie_skin', zombie: 'normal', desc: '普通僵尸变身橄榄球僵尸' },
+    { id: 'zombie_dancing', name: '跳舞僵尸皮肤', price: 500, type: 'zombie_skin', zombie: 'cone', desc: '路障僵尸变身跳舞僵尸' },
+    { id: 'zombie_jack', name: '小丑僵尸皮肤', price: 550, type: 'zombie_skin', zombie: 'bucket', desc: '铁桶僵尸变身小丑僵尸' }
 ];
 
 const RARITY_PRICES = { common: 50, rare: 150, epic: 500 };
@@ -152,7 +162,10 @@ class Game {
         this.ownedSkins = [];
         this.activeSkins = {};
         this.gardenPlants = [];
-        this.gardenSlots = 10;
+        this.gardenSlots = 3;
+        this.gardenSlotsBought = 0;
+        this.extraPlantSlots = 0;
+        this.boughtItems = {};
         
         this.loadProgress();
         this.initGrid();
@@ -171,7 +184,10 @@ class Game {
         this.ownedSkins = JSON.parse(localStorage.getItem('pvz_skins') || '[]');
         this.activeSkins = JSON.parse(localStorage.getItem('pvz_activeSkins') || '{}');
         this.gardenPlants = JSON.parse(localStorage.getItem('pvz_garden') || '[]');
-        this.gardenSlots = parseInt(localStorage.getItem('pvz_slots') || '10');
+        this.gardenSlotsBought = parseInt(localStorage.getItem('pvz_slotsBought') || '0');
+        this.gardenSlots = 3 + this.gardenSlotsBought;
+        this.extraPlantSlots = parseInt(localStorage.getItem('pvz_extraSlots') || '0');
+        this.boughtItems = JSON.parse(localStorage.getItem('pvz_boughtItems') || '{}');
     }
 
     saveProgress() {
@@ -184,7 +200,9 @@ class Game {
         localStorage.setItem('pvz_skins', JSON.stringify(this.ownedSkins));
         localStorage.setItem('pvz_activeSkins', JSON.stringify(this.activeSkins));
         localStorage.setItem('pvz_garden', JSON.stringify(this.gardenPlants));
-        localStorage.setItem('pvz_slots', this.gardenSlots);
+        localStorage.setItem('pvz_slotsBought', this.gardenSlotsBought);
+        localStorage.setItem('pvz_extraSlots', this.extraPlantSlots);
+        localStorage.setItem('pvz_boughtItems', JSON.stringify(this.boughtItems));
     }
 
     initGrid() {
@@ -248,7 +266,7 @@ class Game {
         else if (type === 'snowpea') this.drawPeashooter(0, true, skin);
         else if (type === 'cherrybomb') this.drawCherryBomb(0);
         else if (type === 'repeater') this.drawRepeater(0, skin);
-        else if (type === 'chomper') this.drawChomper(0);
+        else if (type === 'chomper') this.drawChomper(0, null, skin);
         else if (type === 'potatoMine') this.drawPotatoMine(0);
         else if (type === 'squash') this.drawSquash(0);
         this.ctx = tempCtx; ctx.restore();
@@ -260,24 +278,32 @@ class Game {
     }
 
     showMainMenu() {
-        document.getElementById('mainMenu').style.display = 'flex';
+        this.hideAllScreens();
+        document.getElementById('mainMenuScreen').style.display = 'block';
+        if (!this.menuCanvas) {
+            this.initMenuCanvas();
+        }
+    }
+
+    hideAllScreens() {
+        document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('levelSelectScreen').style.display = 'none';
+        document.getElementById('settingsScreen').style.display = 'none';
+        document.getElementById('gardenScreen').style.display = 'none';
+        document.getElementById('shopScreen').style.display = 'none';
+        document.getElementById('almanacScreen').style.display = 'none';
+        document.getElementById('plantSelectScreen').style.display = 'none';
+        document.getElementById('victoryScreen').style.display = 'none';
+        document.getElementById('battleScreen').style.display = 'none';
         document.getElementById('gameMenu').style.display = 'none';
-        document.getElementById('settingsPanel').style.display = 'none';
         document.getElementById('pauseMenu').style.display = 'none';
-        document.getElementById('gardenPanel').style.display = 'none';
-        document.getElementById('shopPanel').style.display = 'none';
-        document.getElementById('almanacPanel').style.display = 'none';
-        document.getElementById('levelSelectPanel').style.display = 'none';
-        document.getElementById('victoryPanel').style.display = 'none';
-        document.getElementById('plantSelectPanel').style.display = 'none';
+        document.getElementById('newPlantReward').style.display = 'none';
         document.getElementById('countdownDisplay').style.display = 'none';
     }
 
-    hideMainMenu() { document.getElementById('mainMenu').style.display = 'none'; }
-
     showLevelSelect() {
-        this.hideMainMenu();
-        document.getElementById('levelSelectPanel').style.display = 'block';
+        this.hideAllScreens();
+        document.getElementById('levelSelectScreen').style.display = 'block';
         this.renderLevelGrid();
     }
 
@@ -288,7 +314,7 @@ class Game {
             const btn = document.createElement('div');
             const completed = this.completedLevels.includes(i);
             const locked = i > 1 && !this.completedLevels.includes(i - 1);
-            btn.className = 'levelBtn' + (locked ? ' locked' : '') + (completed ? ' completed' : '');
+            btn.className = 'level-btn' + (locked ? ' locked' : '') + (completed ? ' completed' : '');
             const stars = this.levelStars[i] || 0;
             btn.innerHTML = `<div>${i}</div><div class="stars">${'⭐'.repeat(stars)}</div>`;
             if (!locked) {
@@ -304,28 +330,31 @@ class Game {
         const levelConfig = LEVELS[level - 1];
         const availablePlants = levelConfig.plants.filter(p => this.unlockedPlants.includes(p));
         
-        if (availablePlants.length > 7) {
-            document.getElementById('levelSelectPanel').style.display = 'none';
+        const maxPlants = 7 + this.extraPlantSlots;
+        if (availablePlants.length > maxPlants) {
+            this.hideAllScreens();
             this.selectedBattlePlants = [];
             this.showPlantSelection(availablePlants);
         } else {
             this.selectedBattlePlants = availablePlants;
-            document.getElementById('levelSelectPanel').style.display = 'none';
+            this.hideAllScreens();
+            document.getElementById('battleScreen').style.display = 'block';
             document.getElementById('gameMenu').style.display = 'block';
             document.getElementById('gameMenu').querySelector('p').textContent = 
                 `关卡 ${level} - ${levelConfig.waves}波僵尸`;
         }
     }
 
-    showPlantSelection(availablePlants) {
+showPlantSelection(availablePlants) {
         const grid = document.getElementById('plantSelectGrid');
         grid.innerHTML = '';
-        document.getElementById('selectedCount').textContent = '0';
+        const maxPlants = 7 + this.extraPlantSlots;
+        document.getElementById('selectedCount').textContent = `0/${maxPlants}`;
         
         for (const plantKey of availablePlants) {
             const plant = ALL_PLANTS[plantKey];
             const div = document.createElement('div');
-            div.className = 'shopItem';
+            div.className = 'shop-item';
             div.dataset.plant = plantKey;
             
             const iconCanvas = document.createElement('canvas');
@@ -339,19 +368,20 @@ class Game {
             grid.appendChild(div);
         }
         
-        document.getElementById('plantSelectPanel').style.display = 'block';
+        document.getElementById('plantSelectScreen').style.display = 'block';
     }
 
     togglePlantSelection(plantKey, element) {
         const idx = this.selectedBattlePlants.indexOf(plantKey);
+        const maxPlants = 7 + this.extraPlantSlots;
         if (idx >= 0) {
             this.selectedBattlePlants.splice(idx, 1);
             element.classList.remove('owned');
-        } else if (this.selectedBattlePlants.length < 7) {
+        } else if (this.selectedBattlePlants.length < maxPlants) {
             this.selectedBattlePlants.push(plantKey);
             element.classList.add('owned');
         }
-        document.getElementById('selectedCount').textContent = this.selectedBattlePlants.length;
+        document.getElementById('selectedCount').textContent = `${this.selectedBattlePlants.length}/${maxPlants}`;
     }
 
     confirmPlantSelection() {
@@ -359,7 +389,8 @@ class Game {
             alert('请至少选择一个植物！');
             return;
         }
-        document.getElementById('plantSelectPanel').style.display = 'none';
+        this.hideAllScreens();
+        document.getElementById('battleScreen').style.display = 'block';
         document.getElementById('gameMenu').style.display = 'block';
         const levelConfig = LEVELS[this.pendingLevel - 1];
         document.getElementById('gameMenu').querySelector('p').textContent = 
@@ -367,29 +398,33 @@ class Game {
     }
 
     closeLevelSelect() {
-        document.getElementById('levelSelectPanel').style.display = 'none';
         this.showMainMenu();
     }
 
-    showSettings() { document.getElementById('settingsPanel').style.display = 'block'; }
-    closeSettings() { document.getElementById('settingsPanel').style.display = 'none'; }
+    showSettings() {
+        this.hideAllScreens();
+        document.getElementById('settingsScreen').style.display = 'block';
+    }
+    closeSettings() { this.showMainMenu(); }
 
     showGarden() {
-        this.hideMainMenu();
-        document.getElementById('gardenPanel').style.display = 'block';
+        this.hideAllScreens();
+        document.getElementById('gardenScreen').style.display = 'block';
         document.getElementById('seedCount').textContent = this.seeds;
         this.renderGarden();
     }
 
-    closeGarden() { document.getElementById('gardenPanel').style.display = 'none'; this.showMainMenu(); }
+    closeGarden() { this.showMainMenu(); }
 
     renderGarden() {
         const grid = document.getElementById('gardenGrid');
         grid.innerHTML = '';
-        for (let i = 0; i < this.gardenSlots; i++) {
+        const totalSlots = 10;
+        for (let i = 0; i < totalSlots; i++) {
             const slot = document.createElement('div');
-            slot.className = 'gardenSlot' + (this.gardenPlants[i] ? ' hasPlant' : '');
-            if (this.gardenPlants[i]) {
+            const isUnlocked = i < this.gardenSlots;
+            slot.className = 'garden-slot' + (this.gardenPlants[i] ? ' has-plant' : '') + (!isUnlocked ? ' locked-slot' : '');
+            if (this.gardenPlants[i] && isUnlocked) {
                 const plant = this.gardenPlants[i];
                 slot.innerHTML = `<canvas width="60" height="60"></canvas>`;
                 const ctx = slot.querySelector('canvas').getContext('2d');
@@ -409,11 +444,16 @@ class Game {
                 slot.appendChild(rarityDiv);
                 
                 slot.title = `${plant.name} - ${growthPercent}%`;
+            } else if (!isUnlocked) {
+                slot.innerHTML = '<span style="color:#666;font-size:24px">🔒</span>';
+                slot.title = '在商店购买花园槽位解锁';
             } else {
                 slot.innerHTML = '<span style="color:#8B4513;font-size:24px">+</span>';
                 slot.title = '点击种植';
             }
-            slot.addEventListener('click', () => this.plantInGarden(i));
+            if (isUnlocked) {
+                slot.addEventListener('click', () => this.plantInGarden(i));
+            }
             grid.appendChild(slot);
         }
     }
@@ -460,13 +500,13 @@ class Game {
     }
 
     showShop() {
-        this.hideMainMenu();
-        document.getElementById('shopPanel').style.display = 'block';
+        this.hideAllScreens();
+        document.getElementById('shopScreen').style.display = 'block';
         document.getElementById('shopCoins').textContent = this.coins;
         this.renderShop();
     }
 
-    closeShop() { document.getElementById('shopPanel').style.display = 'none'; this.showMainMenu(); }
+    closeShop() { this.showMainMenu(); }
 
     renderShop() {
         const grid = document.getElementById('shopGrid');
@@ -474,16 +514,33 @@ class Game {
         for (const item of SHOP_ITEMS) {
             const div = document.createElement('div');
             const owned = this.ownedSkins.includes(item.id);
-            const active = this.activeSkins[item.plant] === item.id;
-            div.className = 'shopItem' + (owned ? ' owned' : '') + (active ? ' active' : '');
+            const active = item.type === 'skin' || item.type === 'zombie_skin' ? this.activeSkins[item.plant || item.zombie] === item.id : false;
+            const boughtCount = this.boughtItems[item.id] || 0;
+            const maxReached = item.maxBuy && boughtCount >= item.maxBuy;
+            const canBuy = !owned && !maxReached && item.type !== 'skin' && item.type !== 'zombie_skin';
+            
+            div.className = 'shop-item' + (owned || maxReached ? ' owned' : '') + (active ? ' active' : '');
+            
+            let priceText = '';
+            if (item.type === 'skin' || item.type === 'zombie_skin') {
+                priceText = owned ? (active ? '使用中' : '点击装备') : `🪙 ${item.price}`;
+            } else if (item.type === 'slot') {
+                priceText = maxReached ? '已购满' : `🪙 ${item.price} (${boughtCount}/${item.maxBuy})`;
+            } else if (item.type === 'plantslot') {
+                priceText = maxReached ? '已购满' : `🪙 ${item.price} (${boughtCount}/${item.maxBuy})`;
+            } else if (item.type === 'seed') {
+                priceText = `🪙 ${item.price}`;
+            }
+            
             div.innerHTML = `
-                <div style="font-weight:bold;margin-bottom:5px">${item.name}</div>
-                <div style="font-size:12px;color:#aaa">${item.desc}</div>
-                <div class="price">${owned ? (item.type === 'skin' ? (active ? '使用中' : '点击装备') : '已拥有') : '🪙 ' + item.price}</div>
+                <div style="font-weight:bold;margin-bottom:5px;font-size:14px">${item.name}</div>
+                <div style="font-size:11px;color:#aaa;margin-bottom:5px">${item.desc}</div>
+                <div class="price">${priceText}</div>
             `;
-            if (owned && item.type === 'skin') {
+            
+            if (owned && (item.type === 'skin' || item.type === 'zombie_skin')) {
                 div.addEventListener('click', () => this.toggleSkin(item));
-            } else if (!owned) {
+            } else if (canBuy) {
                 div.addEventListener('click', () => this.buyItem(item));
             }
             grid.appendChild(div);
@@ -491,10 +548,11 @@ class Game {
     }
 
     toggleSkin(item) {
-        if (this.activeSkins[item.plant] === item.id) {
-            delete this.activeSkins[item.plant];
+        const key = item.plant || item.zombie;
+        if (this.activeSkins[key] === item.id) {
+            delete this.activeSkins[key];
         } else {
-            this.activeSkins[item.plant] = item.id;
+            this.activeSkins[key] = item.id;
         }
         this.saveProgress();
         this.renderShop();
@@ -502,31 +560,47 @@ class Game {
     }
 
     buyItem(item) {
-        if (this.coins >= item.price) {
-            this.coins -= item.price;
-            if (item.type === 'skin') {
-                this.ownedSkins.push(item.id);
-                this.activeSkins[item.plant] = item.id;
-            }
-            else if (item.type === 'slot') this.gardenSlots += 5;
-            this.saveProgress();
-            document.getElementById('shopCoins').textContent = this.coins;
-            this.renderShop();
-            sound.coinCollectSound();
+        if (this.coins < item.price) return;
+        
+        const boughtCount = this.boughtItems[item.id] || 0;
+        if (item.maxBuy && boughtCount >= item.maxBuy) return;
+        
+        this.coins -= item.price;
+        
+        if (item.type === 'skin') {
+            this.ownedSkins.push(item.id);
+            this.activeSkins[item.plant] = item.id;
+        } else if (item.type === 'zombie_skin') {
+            this.ownedSkins.push(item.id);
+            this.activeSkins[item.zombie] = item.id;
+        } else if (item.type === 'slot') {
+            this.gardenSlotsBought++;
+            this.gardenSlots = 3 + this.gardenSlotsBought;
+            this.boughtItems[item.id] = boughtCount + 1;
+        } else if (item.type === 'plantslot') {
+            this.extraPlantSlots++;
+            this.boughtItems[item.id] = boughtCount + 1;
+        } else if (item.type === 'seed') {
+            this.seeds++;
         }
+        
+        this.saveProgress();
+        document.getElementById('shopCoins').textContent = this.coins;
+        this.renderShop();
+        sound.coinCollectSound();
     }
 
     showAlmanac() {
-        this.hideMainMenu();
-        document.getElementById('almanacPanel').style.display = 'block';
+        this.hideAllScreens();
+        document.getElementById('almanacScreen').style.display = 'block';
         this.switchAlmanacTab('plants');
     }
 
-    closeAlmanac() { document.getElementById('almanacPanel').style.display = 'none'; this.showMainMenu(); }
+    closeAlmanac() { this.showMainMenu(); }
 
     switchAlmanacTab(tab) {
-        document.querySelectorAll('.almanacTab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        if (event && event.target) event.target.classList.add('active');
         this.renderAlmanac(tab);
     }
 
@@ -542,17 +616,17 @@ class Game {
         for (const [key, item] of Object.entries(items)) {
             const div = document.createElement('div');
             const isUnlocked = unlocked.includes(key);
-            div.className = 'almanacItem' + (isUnlocked ? '' : ' locked');
+            div.className = 'almanac-item' + (isUnlocked ? '' : ' locked');
             
             const iconCanvas = document.createElement('canvas');
             iconCanvas.width = 48; iconCanvas.height = 48;
-            iconCanvas.className = 'itemIcon';
+            iconCanvas.className = 'item-icon';
             if (isUnlocked) {
                 this.drawAlmanacIcon(iconCanvas, key, type);
             }
             
-            div.innerHTML = `<div class="itemName">${isUnlocked ? item.name : '???'}</div>`;
-            div.insertBefore(iconCanvas, div.querySelector('.itemName'));
+            div.innerHTML = `<div class="item-name">${isUnlocked ? item.name : '???'}</div>`;
+            div.insertBefore(iconCanvas, div.querySelector('.item-name'));
             
             if (isUnlocked) {
                 div.addEventListener('click', () => this.showAlmanacDetail(key, type, item));
@@ -572,7 +646,7 @@ class Game {
             else if (key === 'snowpea') this.drawPeashooter(0, true);
             else if (key === 'cherrybomb') this.drawCherryBomb(0);
             else if (key === 'repeater') this.drawRepeater(0);
-            else if (key === 'chomper') this.drawChomper(0);
+            else if (key === 'chomper') this.drawChomper(0, null);
             else if (key === 'potatoMine') this.drawPotatoMine(0);
             else if (key === 'squash') this.drawSquash(0);
         } else {
@@ -583,6 +657,10 @@ class Game {
             else if (key === 'polevault') this.drawPolevaultZombie({hasJumped: false});
             else if (key === 'newspaper') this.drawNewspaperZombie({});
             else if (key === 'screenDoor') this.drawScreenDoorZombie();
+            else if (key === 'football') this.drawFootballZombie();
+            else if (key === 'dancing') this.drawDancingZombie();
+            else if (key === 'zomboni') this.drawZomboniZombie();
+            else if (key === 'jack') this.drawJackZombie();
         }
         this.ctx = tempCtx; ctx.restore();
     }
@@ -597,13 +675,13 @@ class Game {
         
         detail.innerHTML = '';
         const iconDiv = document.createElement('div');
-        iconDiv.className = 'detailIcon';
+        iconDiv.className = 'detail-icon';
         iconDiv.appendChild(iconCanvas);
         detail.appendChild(iconDiv);
         
         detail.innerHTML += `
-            <div class="detailName">${item.name}</div>
-            <div class="detailDesc">
+            <div class="detail-name">${item.name}</div>
+            <div class="detail-desc">
                 ${item.desc}<br><br>
                 ${type === 'plants' ? `阳光消耗: ${item.cost || '-'}<br>冷却时间: ${(item.cooldown || 0) / 1000}秒` : `生命值: ${item.health}<br>移动速度: ${item.speed}`}
             </div>
@@ -656,8 +734,10 @@ class Game {
     handleClick(e) {
         if (!this.gameRunning || this.gameOver || this.gameWon || this.paused) return;
         const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
         
         for (let i = this.suns.length - 1; i >= 0; i--) {
             const sun = this.suns[i];
@@ -924,21 +1004,6 @@ class Game {
                         sound.explosionSound();
                     }, 500);
                 }
-            } else if (plant.type === 'potatoMine' && plant.armed && !plant.triggered) {
-                const nearZombie = this.zombies.find(z => z.row === plant.row && Math.abs(z.x - plant.x) < 30);
-                if (nearZombie) {
-                    plant.triggered = true;
-                    this.zombies = this.zombies.filter(z => {
-                        if (z.row === plant.row && Math.abs(z.x - plant.x) < 60) {
-                            this.addParticles(z.x, z.y, '#ff6600', 15);
-                            return false;
-                        }
-                        return true;
-                    });
-                    this.grid[plant.row][plant.col] = null;
-                    this.plants = this.plants.filter(p => p !== plant);
-                    sound.explosionSound();
-                }
             } else if (plant.type === 'chomper' && !plant.eating && !plant.digesting) {
                 const nearZombie = this.zombies.find(z => z.row === plant.row && Math.abs(z.x - plant.x) < 50);
                 if (nearZombie) {
@@ -980,8 +1045,8 @@ class Game {
                 this.zombies.splice(i, 1);
                 this.zombiesKilled++;
                 sound.zombieDeathSound();
-                if (Math.random() < 0.15) this.spawnCoin(zombie.x, zombie.y);
-                if (Math.random() < 0.01) this.spawnSeed(zombie.x, zombie.y);
+                if (Math.random() < 0.25) this.spawnCoin(zombie.x, zombie.y);
+                if (Math.random() < 0.05) this.spawnSeed(zombie.x, zombie.y);
                 continue;
             }
             if (zombie.slowed && now > zombie.slowTimer) zombie.slowed = false;
@@ -998,6 +1063,21 @@ class Game {
             } else {
                 for (const plant of this.plants) {
                     if (plant.row === zombie.row && Math.abs(plant.x - zombie.x) < 40) {
+                        if (plant.type === 'potatoMine' && plant.armed && !plant.triggered) {
+                            plant.triggered = true;
+                            this.zombies = this.zombies.filter(z => {
+                                if (z.row === plant.row && Math.abs(z.x - plant.x) < 60) {
+                                    this.addParticles(z.x, z.y, '#ff6600', 15);
+                                    return false;
+                                }
+                                return true;
+                            });
+                            this.grid[plant.row][plant.col] = null;
+                            this.plants = this.plants.filter(p => p !== plant);
+                            sound.explosionSound();
+                            blocked = true;
+                            break;
+                        }
                         blocked = true; zombie.attacking = true;
                         plant.health -= zombie.damage * deltaTime / 1000;
                         if (plant.health <= 0) {
@@ -1097,6 +1177,8 @@ class Game {
     }
 
     showVictoryPanel(stars) {
+        this.hideAllScreens();
+        document.getElementById('victoryScreen').style.display = 'block';
         document.getElementById('victoryStars').textContent = '⭐'.repeat(stars);
         document.getElementById('victoryMessage').textContent = `获得 ${stars} 星评价！`;
         const nextBtn = document.getElementById('nextLevelBtn');
@@ -1105,18 +1187,15 @@ class Game {
         } else {
             nextBtn.style.display = 'block';
         }
-        document.getElementById('victoryPanel').style.display = 'block';
     }
 
     nextLevel() {
-        document.getElementById('victoryPanel').style.display = 'none';
         if (this.currentLevel < LEVELS.length) {
             this.selectLevel(this.currentLevel + 1);
         }
     }
 
     returnToMenu() {
-        document.getElementById('victoryPanel').style.display = 'none';
         this.showMainMenu();
     }
 
@@ -1184,12 +1263,13 @@ class Game {
         const skin = this.activeSkins[plant.type];
         this.ctx.save();
         this.ctx.translate(x, y);
-        if (skin) {
+if (skin) {
             this.ctx.shadowColor = skin === 'golden_peashooter' ? '#FFD700' : 
                                    skin === 'ice_wallnut' ? '#00BCD4' :
                                    skin === 'fire_sunflower' ? '#FF4500' :
                                    skin === 'diamond_repeater' ? '#00CED1' :
-                                   skin === 'shadow_snowpea' ? '#9400D3' : '#fff';
+                                   skin === 'shadow_snowpea' ? '#9400D3' :
+                                   skin === 'purple_chomper' ? '#9932CC' : '#fff';
             this.ctx.shadowBlur = 15;
         }
         if (plant.type === 'sunflower') this.drawSunflower(time, skin);
@@ -1198,7 +1278,7 @@ class Game {
         else if (plant.type === 'snowpea') this.drawPeashooter(time, true, skin);
         else if (plant.type === 'cherrybomb') this.drawCherryBomb(time);
         else if (plant.type === 'repeater') this.drawRepeater(time, skin);
-        else if (plant.type === 'chomper') this.drawChomper(time, plant);
+        else if (plant.type === 'chomper') this.drawChomper(time, plant, skin);
         else if (plant.type === 'potatoMine') this.drawPotatoMine(time, plant);
         else if (plant.type === 'squash') this.drawSquash(time, plant);
         this.ctx.restore();
@@ -1301,11 +1381,13 @@ class Game {
         }
     }
 
-    drawChomper(time, plant) {
+    drawChomper(time, plant, skin) {
         const openMouth = plant && !plant.eating && !plant.digesting;
         const mouthAngle = openMouth ? 0.8 : 0.3;
-        this.ctx.fillStyle = '#9932CC'; this.ctx.beginPath(); this.ctx.arc(0, 0, 20, 0, Math.PI * 2); this.ctx.fill();
-        this.ctx.fillStyle = '#4B0082'; this.ctx.fillRect(-4, 15, 8, 20);
+        const bodyColor = skin === 'purple_chomper' ? '#4B0082' : '#9932CC';
+        const darkColor = skin === 'purple_chomper' ? '#2E0854' : '#4B0082';
+        this.ctx.fillStyle = bodyColor; this.ctx.beginPath(); this.ctx.arc(0, 0, 20, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = darkColor; this.ctx.fillRect(-4, 15, 8, 20);
         this.ctx.fillStyle = '#228B22';
         this.ctx.beginPath(); this.ctx.ellipse(-20, 10, 15, 8, -0.5, 0, Math.PI * 2); this.ctx.fill();
         this.ctx.beginPath(); this.ctx.ellipse(20, 10, 15, 8, 0.5, 0, Math.PI * 2); this.ctx.fill();
@@ -1313,7 +1395,7 @@ class Game {
             this.ctx.fillStyle = '#FF69B4';
             this.ctx.beginPath(); this.ctx.arc(0, 5, 15, 0, Math.PI * 2); this.ctx.fill();
         } else {
-            this.ctx.fillStyle = '#660066';
+            this.ctx.fillStyle = skin === 'purple_chomper' ? '#1a0033' : '#660066';
             this.ctx.beginPath(); this.ctx.arc(0, -10, 18, 0.3, Math.PI - 0.3); this.ctx.arc(0, 5, 15, Math.PI + mouthAngle, -mouthAngle); this.ctx.closePath(); this.ctx.fill();
             this.ctx.fillStyle = '#FF1493';
             this.ctx.beginPath(); this.ctx.arc(0, 0, 5, 0, Math.PI * 2); this.ctx.fill();
@@ -1367,13 +1449,17 @@ class Game {
             this.ctx.fillStyle = 'rgba(135, 206, 235, 0.5)';
             this.ctx.beginPath(); this.ctx.arc(0, 0, 35, 0, Math.PI * 2); this.ctx.fill();
         }
-        if (zombie.type === 'normal') this.drawNormalZombie();
+if (zombie.type === 'normal') this.drawNormalZombie();
         else if (zombie.type === 'cone') this.drawConeZombie();
         else if (zombie.type === 'bucket') this.drawBucketZombie();
         else if (zombie.type === 'flag') this.drawFlagZombie();
         else if (zombie.type === 'polevault') this.drawPolevaultZombie(zombie);
         else if (zombie.type === 'newspaper') this.drawNewspaperZombie(zombie);
         else if (zombie.type === 'screenDoor') this.drawScreenDoorZombie();
+        else if (zombie.type === 'football') this.drawFootballZombie();
+        else if (zombie.type === 'dancing') this.drawDancingZombie();
+        else if (zombie.type === 'zomboni') this.drawZomboniZombie();
+        else if (zombie.type === 'jack') this.drawJackZombie();
         else this.drawNormalZombie();
         this.ctx.restore();
         this.ctx.fillStyle = '#333';
@@ -1458,13 +1544,98 @@ class Game {
         }
     }
 
-    drawScreenDoorZombie() {
+drawScreenDoorZombie() {
         this.drawNormalZombie();
         this.ctx.strokeStyle = '#808080'; this.ctx.lineWidth = 3;
         this.ctx.beginPath(); this.ctx.rect(-35, -20, 15, 50); this.ctx.stroke();
         for (let i = 0; i < 5; i++) {
             this.ctx.beginPath(); this.ctx.moveTo(-35, -15 + i * 10); this.ctx.lineTo(-20, -15 + i * 10); this.ctx.stroke();
         }
+    }
+
+    drawFootballZombie() {
+        this.ctx.strokeStyle = '#2d3436'; this.ctx.lineWidth = 2;
+        this.ctx.fillStyle = '#4a5568'; this.ctx.beginPath(); this.ctx.ellipse(0, 28, 14, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#2d3748'; this.ctx.fillRect(-12, 35, 8, 15); this.ctx.fillRect(4, 35, 8, 15);
+        this.ctx.fillStyle = '#7B8B6F'; this.ctx.beginPath(); this.ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.beginPath(); this.ctx.moveTo(-20, -25); this.ctx.lineTo(-15, -5); this.ctx.lineTo(15, -5); this.ctx.lineTo(20, -25); this.ctx.closePath(); this.ctx.fill();
+        this.ctx.fillStyle = '#8B4513'; this.ctx.fillRect(-3, -35, 6, 15);
+        this.ctx.fillStyle = '#FEDC56';
+        this.ctx.beginPath(); this.ctx.ellipse(-8, -2, 5, 6, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.ellipse(8, -2, 5, 6, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#E53E3E';
+        this.ctx.beginPath(); this.ctx.arc(-8, -1, 2, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(8, -1, 2, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#2d3436'; this.ctx.beginPath(); this.ctx.arc(0, 8, 6, 0, Math.PI); this.ctx.fill();
+        this.ctx.fillStyle = '#444'; this.ctx.fillRect(-30, 10, 12, 20);
+        this.ctx.fillStyle = '#666'; this.ctx.fillRect(-28, 12, 8, 16);
+    }
+
+    drawDancingZombie() {
+        this.ctx.strokeStyle = '#2d3436'; this.ctx.lineWidth = 2;
+        this.ctx.fillStyle = '#4a5568'; this.ctx.beginPath(); this.ctx.ellipse(0, 28, 14, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#2d3748'; this.ctx.fillRect(-12, 35, 8, 15); this.ctx.fillRect(4, 35, 8, 15);
+        this.ctx.fillStyle = '#FF69B4'; this.ctx.beginPath(); this.ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#FF1493'; this.ctx.fillRect(-25, -5, 50, 8);
+        this.ctx.fillStyle = '#8B4513';
+        this.ctx.beginPath(); this.ctx.ellipse(-12, -20, 10, 12, -0.3, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.ellipse(12, -20, 10, 12, 0.3, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FEDC56';
+        this.ctx.beginPath(); this.ctx.ellipse(-8, -2, 6, 7, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.ellipse(8, -2, 6, 7, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#E53E3E';
+        this.ctx.beginPath(); this.ctx.arc(-8, -1, 2.5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(8, -1, 2.5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FF69B4'; this.ctx.beginPath(); this.ctx.arc(0, 8, 5, 0, Math.PI); this.ctx.fill();
+    }
+
+    drawZomboniZombie() {
+        this.ctx.fillStyle = '#4a4a4a';
+        this.ctx.beginPath(); this.ctx.roundRect(-35, -10, 70, 35, 5);
+        this.ctx.fill();
+        this.ctx.strokeStyle = '#333'; this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.beginPath(); this.ctx.arc(-20, 30, 10, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(20, 30, 10, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#666';
+        this.ctx.beginPath(); this.ctx.arc(-20, 30, 5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(20, 30, 5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#7B8B6F';
+        this.ctx.beginPath(); this.ctx.ellipse(30, -15, 15, 18, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FEDC56';
+        this.ctx.beginPath(); this.ctx.ellipse(25, -18, 4, 5, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.ellipse(35, -18, 4, 5, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#E53E3E';
+        this.ctx.beginPath(); this.ctx.arc(25, -17, 1.5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(35, -17, 1.5, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#87CEEB';
+        this.ctx.globalAlpha = 0.5;
+        this.ctx.fillRect(-30, 25, 60, 10);
+        this.ctx.globalAlpha = 1;
+    }
+
+    drawJackZombie() {
+        this.ctx.strokeStyle = '#2d3436'; this.ctx.lineWidth = 2;
+        this.ctx.fillStyle = '#4a5568'; this.ctx.beginPath(); this.ctx.ellipse(0, 28, 14, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#2d3748'; this.ctx.fillRect(-12, 35, 8, 15); this.ctx.fillRect(4, 35, 8, 15);
+        this.ctx.fillStyle = '#FF1493'; this.ctx.beginPath(); this.ctx.ellipse(0, 0, 18, 20, 0, 0, Math.PI * 2); this.ctx.fill(); this.ctx.stroke();
+        this.ctx.fillStyle = '#FF69B4';
+        this.ctx.beginPath(); this.ctx.arc(-20, -10, 10, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(20, -10, 10, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FF1493';
+        this.ctx.beginPath(); this.ctx.arc(-20, -10, 6, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(20, -10, 6, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FFF';
+        this.ctx.beginPath(); this.ctx.ellipse(-8, -2, 5, 6, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.ellipse(8, -2, 5, 6, 0, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FF0000';
+        this.ctx.beginPath(); this.ctx.arc(-8, -1, 2, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.beginPath(); this.ctx.arc(8, -1, 2, 0, Math.PI * 2); this.ctx.fill();
+        this.ctx.fillStyle = '#FF1493'; this.ctx.beginPath(); this.ctx.arc(0, 8, 5, 0, Math.PI); this.ctx.fill();
+        this.ctx.fillStyle = '#FFD700';
+        this.ctx.beginPath(); this.ctx.arc(0, -25, 5, 0, Math.PI * 2); this.ctx.fill();
     }
 
     drawProjectile(projectile) {
@@ -1536,7 +1707,8 @@ class Game {
     }
 
     startLevel() {
-        this.hideMenu();
+        this.hideAllScreens();
+        document.getElementById('battleScreen').style.display = 'block';
         const levelConfig = LEVELS[this.currentLevel - 1];
         this.totalWaves = levelConfig.waves;
         this.sunCount = levelConfig.sun;
@@ -1584,7 +1756,228 @@ class Game {
         requestAnimationFrame((t) => this.gameLoop(t));
     }
 
-    run() { requestAnimationFrame((t) => this.gameLoop(t)); }
+    run() { 
+        requestAnimationFrame((t) => this.gameLoop(t)); 
+    }
+
+    initMenuCanvas() {
+        this.menuCanvas = document.getElementById('menuCanvas');
+        if (!this.menuCanvas) return;
+        this.menuCtx = this.menuCanvas.getContext('2d');
+        this.resizeMenuCanvas();
+        window.addEventListener('resize', () => this.resizeMenuCanvas());
+        
+        this.menuEntities = {
+            plants: [
+                { type: 'sunflower', x: 0.1, y: 0.55, bobOffset: 0, bobSpeed: 0.003 },
+                { type: 'peashooter', x: 0.25, y: 0.6, bobOffset: 1, bobSpeed: 0.004 },
+                { type: 'wallnut', x: 0.75, y: 0.58, bobOffset: 2, bobSpeed: 0.0035 },
+                { type: 'repeater', x: 0.88, y: 0.62, bobOffset: 0.5, bobSpeed: 0.0045 }
+            ],
+            zombies: [
+                { type: 'normal', x: -0.1, y: 0.7, speed: 0.0003, direction: 1, frame: 0, animTimer: 0 },
+                { type: 'cone', x: -0.2, y: 0.75, speed: 0.00025, direction: 1, frame: 0, animTimer: 0 }
+            ],
+            mowers: [
+                { x: -0.05, y: 0.85, speed: 0.0004, direction: 1 }
+            ],
+            peas: [
+                { x: 0.3, y: 0.55, speed: 0.002 },
+                { x: 0.5, y: 0.58, speed: 0.0025 }
+            ],
+            suns: [
+                { x: 0.15, y: 0.2, bobOffset: 0, scale: 0.6 },
+                { x: 0.85, y: 0.25, bobOffset: Math.PI, scale: 0.5 }
+            ]
+        };
+        
+        this.menuAnimLoop();
+    }
+
+    resizeMenuCanvas() {
+        if (this.menuCanvas) {
+            this.menuCanvas.width = window.innerWidth;
+            this.menuCanvas.height = window.innerHeight;
+        }
+    }
+
+    menuAnimLoop() {
+        if (!this.menuCanvas || !this.menuCtx) return;
+        if (document.getElementById('mainMenuScreen').style.display === 'block') {
+            this.updateMenuEntities();
+            this.renderMenuCanvas();
+        }
+        requestAnimationFrame(() => this.menuAnimLoop());
+    }
+
+    updateMenuEntities() {
+        if (!this.menuEntities) return;
+        const now = Date.now();
+        
+        for (const z of this.menuEntities.zombies) {
+            z.x += z.speed * z.direction * 16.67;
+            z.animTimer += 16.67;
+            if (z.animTimer > 200) { z.frame = (z.frame + 1) % 2; z.animTimer = 0; }
+            if (z.x > 1.1) z.x = -0.15;
+        }
+        
+        for (const m of this.menuEntities.mowers) {
+            m.x += m.speed * m.direction * 16.67;
+            if (m.x > 1.1) m.x = -0.08;
+        }
+        
+        for (const p of this.menuEntities.peas) {
+            p.x += p.speed * 16.67;
+            if (p.x > 1.05) p.x = 0.25 + Math.random() * 0.1;
+        }
+    }
+
+    renderMenuCanvas() {
+        if (!this.menuEntities || !this.menuCtx) return;
+        const ctx = this.menuCtx;
+        const w = this.menuCanvas.width;
+        const h = this.menuCanvas.height;
+        const now = Date.now();
+        ctx.clearRect(0, 0, w, h);
+        
+        const tempCtx = this.ctx;
+        this.ctx = ctx;
+        
+        for (const sun of this.menuEntities.suns) {
+            const y = sun.y * h + Math.sin(Date.now() / 1000 + sun.bobOffset) * 10;
+            ctx.save();
+            ctx.translate(sun.x * w, y);
+            ctx.scale(sun.scale, sun.scale);
+            this.drawMenuSun();
+            ctx.restore();
+        }
+        
+        for (const plant of this.menuEntities.plants) {
+            const y = plant.y * h + Math.sin(Date.now() * plant.bobSpeed + plant.bobOffset) * 8;
+            ctx.save();
+            ctx.translate(plant.x * w, y);
+            ctx.scale(0.8, 0.8);
+            const time = now / 1000;
+            if (plant.type === 'sunflower') this.drawSunflower(time);
+            else if (plant.type === 'peashooter') this.drawPeashooter(time, false);
+            else if (plant.type === 'wallnut') this.drawWallnut({health: 4000, maxHealth: 4000});
+            else if (plant.type === 'repeater') this.drawRepeater(time);
+            ctx.restore();
+        }
+        
+        for (const pea of this.menuEntities.peas) {
+            ctx.save();
+            ctx.translate(pea.x * w, pea.y * h);
+            ctx.scale(0.6, 0.6);
+            this.ctx.fillStyle = '#90EE90';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, 10, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.strokeStyle = '#228B22';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            ctx.restore();
+        }
+        
+        for (const z of this.menuEntities.zombies) {
+            ctx.save();
+            ctx.translate(z.x * w, z.y * h);
+            ctx.scale(0.9, 0.9);
+            const wobble = Math.sin(now / 300 + z.x * 100) * 3;
+            ctx.translate(0, wobble);
+            if (z.type === 'normal') this.drawNormalZombie();
+            else if (z.type === 'cone') this.drawConeZombie();
+            ctx.restore();
+        }
+        
+        for (const m of this.menuEntities.mowers) {
+            ctx.save();
+            ctx.translate(m.x * w, m.y * h);
+            ctx.scale(1.2, 1.2);
+            this.drawMenuLawnMower();
+            ctx.restore();
+        }
+        
+        this.ctx = tempCtx;
+    }
+
+    drawMenuSun() {
+        const ctx = this.ctx;
+        const pulse = Math.sin(Date.now() / 200) * 0.1 + 1;
+        const size = 25 * pulse;
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+        gradient.addColorStop(0, '#FFFF00');
+        gradient.addColorStop(0.7, '#FFD700');
+        gradient.addColorStop(1, '#FFA500');
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2 + Date.now() / 1000;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(angle) * 35, Math.sin(angle) * 35);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+            ctx.stroke();
+        }
+    }
+
+    drawMenuLawnMower() {
+        const ctx = this.ctx;
+        ctx.fillStyle = '#DC2626';
+        ctx.strokeStyle = '#991B1B';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-25, -18, 50, 30, 4);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#1F2937';
+        ctx.fillRect(22, -22, 10, 38);
+        
+        ctx.fillStyle = '#374151';
+        ctx.beginPath();
+        ctx.moveTo(-25, -18);
+        ctx.lineTo(-32, -25);
+        ctx.lineTo(-32, 0);
+        ctx.lineTo(-25, 5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#EF4444';
+        ctx.beginPath();
+        ctx.moveTo(-10, -18);
+        ctx.lineTo(-15, -28);
+        ctx.lineTo(10, -28);
+        ctx.lineTo(5, -18);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#1F2937';
+        ctx.strokeStyle = '#111827';
+        ctx.beginPath();
+        ctx.arc(-15, 18, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(15, 18, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = '#6B7280';
+        ctx.beginPath();
+        ctx.arc(-15, 18, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(15, 18, 5, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 const game = new Game();

@@ -1,103 +1,111 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; 
+    user-select: none;
+    -webkit-user-select: none;
+}
 
 body {
-    background: linear-gradient(to bottom, #87CEEB, #228B22);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Microsoft YaHei', sans-serif;
+    background: #000;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
+    font-family: 'Microsoft YaHei', sans-serif;
 }
 
 #gameContainer {
     position: relative;
-    background: #4a7c23;
-    border: 4px solid #2d5016;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
-#gameCanvas { display: block; cursor: pointer; }
+/* ============ 战斗界面 ============ */
+#battleScreen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, #2d5016 0%, #4a7c23 50%, #2d5016 100%);
+    display: none;
+    z-index: 10;
+}
+
+#gameCanvas { 
+    display: block; 
+    width: 100%; 
+    height: 100%;
+}
 
 #topBar {
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 80px;
-    background: linear-gradient(to bottom, #5d4037, #3e2723);
+    height: 70px;
+    background: linear-gradient(180deg, #5d4037 0%, #3e2723 100%);
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 0 15px;
+    z-index: 20;
     border-bottom: 3px solid #2d5016;
 }
 
 #sunCounter {
-    background: linear-gradient(to bottom, #fff59d, #ffc107);
-    border: 3px solid #ff8f00;
+    background: linear-gradient(180deg, #fff59d 0%, #ffc107 100%);
+    border: 2px solid #ff8f00;
     border-radius: 20px;
     padding: 8px 15px;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     color: #5d4037;
-    min-width: 100px;
+    min-width: 90px;
     text-align: center;
     margin-right: 10px;
 }
 
 #coinCounter {
-    background: linear-gradient(to bottom, #ffd700, #daa520);
-    border: 3px solid #b8860b;
+    background: linear-gradient(180deg, #ffd700 0%, #daa520 100%);
+    border: 2px solid #b8860b;
     border-radius: 20px;
-    padding: 8px 15px;
+    padding: 8px 12px;
     font-size: 16px;
     font-weight: bold;
     color: #5d4037;
-    min-width: 80px;
-    text-align: center;
     margin-right: 10px;
 }
 
 #shovelBtn {
-    width: 50px; height: 60px;
-    background: linear-gradient(to bottom, #bcaaa4, #8d6e63);
+    width: 45px; height: 55px;
+    background: linear-gradient(180deg, #bcaaa4 0%, #8d6e63 100%);
     border: 2px solid #5d4037;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 24px;
     margin-right: 10px;
 }
-
-#shovelBtn:hover { background: linear-gradient(to bottom, #a1887f, #6d4c41); }
+#shovelBtn:hover { background: linear-gradient(180deg, #a1887f 0%, #6d4c41 100%); }
 #shovelBtn.selected { border-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; }
 
-#plantCards { display: flex; gap: 5px; flex: 1; overflow-x: auto; }
+#plantCards { display: flex; gap: 5px; flex: 1; overflow: hidden; }
 
 .plantCard {
-    min-width: 60px; height: 70px;
-    background: linear-gradient(to bottom, #c8e6c9, #81c784);
+    min-width: 55px; height: 60px;
+    background: linear-gradient(180deg, #c8e6c9 0%, #81c784 100%);
     border: 2px solid #388e3c;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    transition: transform 0.1s;
 }
-
-.plantCard:hover { transform: scale(1.05); background: linear-gradient(to bottom, #a5d6a7, #66bb6a); }
+.plantCard:hover { transform: scale(1.05); }
 .plantCard.selected { border-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; }
-.plantCard.locked { background: linear-gradient(to bottom, #9e9e9e, #757575); cursor: not-allowed; }
-.plantCard.locked::after { content: '🔒'; position: absolute; font-size: 20px; }
 .plantCard .cooldownOverlay {
     position: absolute;
     top: 0; left: 0; right: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0,0,0,0.7);
     pointer-events: none;
 }
 .plantCard .cooldownText {
@@ -105,325 +113,947 @@ body {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    z-index: 10;
 }
-.plantCard .icon { position: relative; z-index: 5; }
 .plantCard .cost {
     position: absolute;
     bottom: 2px;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
     color: #2e7d32;
-    background: rgba(255,255,255,0.7);
-    padding: 1px 5px;
-    border-radius: 8px;
-    z-index: 5;
+    background: rgba(255,255,255,0.8);
+    padding: 1px 4px;
+    border-radius: 6px;
 }
 
 #controlBtns { display: flex; gap: 5px; margin-left: 10px; }
-
 .ctrlBtn {
-    width: 40px; height: 40px;
-    background: linear-gradient(to bottom, #607d8b, #455a64);
+    width: 36px; height: 36px;
+    background: linear-gradient(180deg, #607d8b 0%, #455a64 100%);
     border: 2px solid #37474f;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     color: white;
 }
-
 .ctrlBtn:hover { transform: scale(1.1); }
-.ctrlBtn.active { background: linear-gradient(to bottom, #ff9800, #f57c00); border-color: #e65100; }
+.ctrlBtn.active { background: linear-gradient(180deg, #ff9800 0%, #f57c00 100%); }
 
 #waveInfo {
     position: absolute;
-    top: 90px; right: 10px;
-    background: rgba(0,0,0,0.7);
+    top: 80px; right: 15px;
+    background: rgba(0,0,0,0.8);
     color: #fff;
-    padding: 8px 15px;
-    border-radius: 10px;
+    padding: 10px 15px;
+    border-radius: 8px;
     font-size: 16px;
+    z-index: 15;
 }
 
 #levelInfo {
     position: absolute;
-    top: 90px; left: 10px;
-    background: rgba(0,0,0,0.7);
+    top: 80px; left: 15px;
+    background: rgba(0,0,0,0.8);
     color: #fff;
-    padding: 8px 15px;
-    border-radius: 10px;
+    padding: 10px 15px;
+    border-radius: 8px;
     font-size: 16px;
+    z-index: 15;
 }
 
-/* 主菜单背景 - 森林主题 */
-#mainMenu {
+#countdownDisplay {
+    position: absolute;
+    top: 80px;
+    right: 15px;
+    z-index: 100;
+    display: none;
+    text-align: center;
+    background: rgba(0,0,0,0.85);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 2px solid #FFD700;
+    margin-top: 50px;
+}
+#countdownDisplay .countdownText {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 3px;
+}
+#countdownDisplay .countdownTimer {
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFD700;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ============ 场景屏幕基础样式 ============ */
+.sceneScreen {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(180deg, #0d3320 0%, #1a5a3a 30%, #0d2818 70%, #051a0f 100%);
+    display: none;
+    z-index: 50;
+    overflow: hidden;
+}
+
+.scene-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.scene-content {
+    position: relative;
+    z-index: 10;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 200;
+    padding: 20px;
 }
-#mainMenu::before {
+
+.scene-content h2 {
+    font-size: 42px;
+    color: #FFD700;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+    margin-bottom: 30px;
+}
+
+/* ============ 主菜单 - PvZ动态场景 ============ */
+#mainMenuScreen .pvz-bg {
+    background: linear-gradient(180deg, 
+        #87CEEB 0%, 
+        #98D8C8 25%,
+        #7CB342 50%,
+        #558B2F 75%,
+        #33691E 100%);
+    overflow: hidden;
+}
+
+#mainMenuScreen .sky-layer {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: 
+        radial-gradient(circle at 85% 20%, #FFD700 0%, rgba(255, 215, 0, 0.8) 5%, transparent 15%),
+        radial-gradient(circle at 80% 15%, rgba(255, 255, 200, 0.9) 0%, transparent 8%);
+    animation: sunPulse 4s ease-in-out infinite;
+}
+#mainMenuScreen .sky-layer::before {
     content: '';
+    position: absolute;
+    top: 10%; left: 10%;
+    width: 80px; height: 40px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50px;
+    animation: cloudMove 30s linear infinite;
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+#mainMenuScreen .sky-layer::after {
+    content: '';
+    position: absolute;
+    top: 25%; left: 60%;
+    width: 100px; height: 50px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50px;
+    animation: cloudMove 25s linear infinite reverse;
+}
+@keyframes sunPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+@keyframes cloudMove {
+    0% { transform: translateX(-100px); }
+    100% { transform: translateX(calc(100vw + 100px)); }
+}
+
+#mainMenuScreen .grass-layer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60%;
+    background: 
+        repeating-linear-gradient(90deg, 
+            transparent 0px, transparent 50px, 
+            rgba(34, 139, 34, 0.1) 50px, rgba(34, 139, 34, 0.1) 52px);
+}
+
+#mainMenuScreen .fence-layer {
+    position: absolute;
+    bottom: 15%; left: 0; right: 0;
+    height: 100px;
+    background: 
+        repeating-linear-gradient(90deg, 
+            transparent 0px, transparent 40px, 
+            #8B4513 40px, #8B4513 45px, 
+            transparent 45px, transparent 80px);
+    opacity: 0.5;
+}
+
+#menuCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.game-title {
+    font-size: 56px;
+    color: #FFD700;
+    text-shadow: 
+        4px 4px 0 #8B4513,
+        -2px -2px 0 #228B22,
+        0 0 30px rgba(255,215,0,0.5),
+        0 4px 10px rgba(0,0,0,0.5);
+    margin-bottom: 50px;
+    animation: titleFloat 3s ease-in-out infinite;
+    position: relative;
+    z-index: 20;
+}
+@keyframes titleFloat {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.02); }
+}
+
+.game-title::before {
+    content: '🌻';
+    position: absolute;
+    left: -70px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    animation: plantSpin 6s linear infinite;
+}
+.game-title::after {
+    content: '🧟';
+    position: absolute;
+    right: -70px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    animation: zombieShake 2s ease-in-out infinite;
+}
+@keyframes plantSpin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+@keyframes zombieShake {
+    0%, 100% { transform: translateY(-50%) rotate(-5deg); }
+    50% { transform: translateY(-50%) rotate(5deg); }
+}
+
+.menu-buttons { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 14px;
+    position: relative;
+    z-index: 20;
+}
+.menu-btn {
+    width: 300px;
+    padding: 16px 35px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+    border: 3px solid #1B5E20;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 
+        0 5px 15px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    position: relative;
+    overflow: hidden;
+}
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+.menu-btn:hover::before {
+    left: 100%;
+}
+.menu-btn:hover { 
+    transform: translateY(-3px) scale(1.02); 
+    box-shadow: 
+        0 8px 25px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+}
+    background: linear-gradient(180deg, #388e3c 0%, #2e7d32 100%);
+}
+.menu-btn.primary {
+    background: linear-gradient(180deg, #ff9800 0%, #f57c00 100%);
+    border-color: #e65100;
+}
+.menu-btn.primary:hover {
+    background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%);
+}
+
+/* ============ 关卡选择 - 古代地图 ============ */
+#levelSelectScreen .map-bg {
+    background: linear-gradient(180deg, 
+        #d4a574 0%, 
+        #c49464 30%,
+        #b48454 60%,
+        #a47444 100%);
+}
+#levelSelectScreen .map-paper {
+    position: absolute;
+    top: 5%; left: 5%; right: 5%; bottom: 5%;
+    background: 
+        linear-gradient(90deg, transparent 0%, rgba(139, 69, 19, 0.1) 50%, transparent 100%),
+        repeating-linear-gradient(0deg, transparent 0px, transparent 30px, rgba(139, 69, 19, 0.05) 30px, rgba(139, 69, 19, 0.05) 31px);
+    border: 8px solid #8B4513;
+    border-radius: 5px;
+    box-shadow: inset 0 0 50px rgba(139, 69, 19, 0.3);
+}
+#levelSelectScreen .map-compass {
+    position: absolute;
+    top: 15%; right: 10%;
+    width: 80px; height: 80px;
+    border: 4px solid #654321;
+    border-radius: 50%;
+    background: radial-gradient(circle, #daa520 0%, #b8860b 100%);
+    opacity: 0.3;
+}
+#levelSelectScreen .map-compass::after {
+    content: '✦';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: #654321;
+}
+#levelSelectScreen .map-routes {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10 80 Q 30 60, 50 70 T 90 50' stroke='%23654321' stroke-width='2' fill='none' opacity='0.2'/%3E%3Cpath d='M20 30 Q 50 40, 80 20' stroke='%23654321' stroke-width='1.5' fill='none' opacity='0.15'/%3E%3C/svg%3E");
+    background-size: 300px 300px;
+}
+
+.level-grid { 
+    display: grid; 
+    grid-template-columns: repeat(5, 90px); 
+    gap: 18px; 
+    margin-bottom: 30px;
+}
+.level-btn {
+    width: 90px; height: 90px;
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+    border: 3px solid #1B5E20;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+.level-btn:hover { transform: scale(1.1); box-shadow: 0 6px 18px rgba(0,0,0,0.4); }
+.level-btn.locked { 
+    background: linear-gradient(180deg, #757575 0%, #424242 100%); 
+    cursor: not-allowed; 
+    opacity: 0.6;
+}
+.level-btn.locked::after { content: '🔒'; font-size: 16px; margin-top: 5px; }
+.level-btn.completed { 
+    background: linear-gradient(180deg, #FFD700 0%, #FFA000 100%); 
+    border-color: #FF8F00; 
+    color: #5d4037;
+}
+.level-btn .stars { font-size: 12px; margin-top: 4px; }
+
+.back-btn {
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(180deg, #455a64 0%, #37474f 100%);
+    border: 2px solid #263238;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 20px;
+}
+.back-btn:hover { 
+    transform: scale(1.05); 
+    background: linear-gradient(180deg, #546e7a 0%, #455a64 100%);
+}
+
+/* ============ 设置 - 神秘实验室 ============ */
+#settingsScreen .lab-bg {
+    background: linear-gradient(180deg, 
+        #0d1b2a 0%, 
+        #1b263b 30%,
+        #415a77 60%,
+        #1b263b 100%);
+}
+#settingsScreen .lab-shelves {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background: 
-        radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(34, 139, 34, 0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-    pointer-events: none;
+        linear-gradient(90deg, rgba(139, 69, 19, 0.2) 0%, transparent 10%, transparent 90%, rgba(139, 69, 19, 0.2) 100%),
+        repeating-linear-gradient(180deg, transparent 0px, transparent 150px, rgba(139, 69, 19, 0.1) 150px, rgba(139, 69, 19, 0.1) 155px);
 }
-#mainMenu h1 {
-    font-size: 48px;
-    color: #FFD700;
-    text-shadow: 3px 3px 0 #8B4513;
-    margin-bottom: 40px;
-    position: relative;
-    z-index: 1;
+#settingsScreen .lab-potions {
+    position: absolute;
+    top: 20%; left: 5%;
+    width: 60px; height: 80px;
+    background: linear-gradient(180deg, #9c27b0 0%, #7b1fa2 100%);
+    border-radius: 0 0 30px 30px;
+    opacity: 0.4;
+    animation: bubble 2s ease-in-out infinite;
+}
+@keyframes bubble {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+#settingsScreen .lab-glow {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(ellipse 150px 100px at 20% 40%, rgba(100, 149, 237, 0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 100px 80px at 80% 60%, rgba(138, 43, 226, 0.3) 0%, transparent 70%);
+    animation: glowPulse 4s ease-in-out infinite alternate;
+}
+@keyframes glowPulse {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
-.menuBtn {
-    width: 250px;
-    padding: 15px 30px;
-    margin: 10px;
+.settings-box {
+    background: rgba(0,0,0,0.4);
+    padding: 25px 35px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    gap: 20px;
+}
+.setting-item label {
+    font-size: 18px;
+    color: #e0e0e0;
+}
+.setting-item input[type="range"] {
+    width: 180px;
+    cursor: pointer;
+}
+
+/* ============ 花园 - 阳光花园 ============ */
+#gardenScreen .garden-bg {
+    background: linear-gradient(180deg, 
+        #87CEEB 0%, 
+        #98D8C8 30%,
+        #7CB342 55%,
+        #558B2F 75%,
+        #33691E 100%);
+}
+#gardenScreen .garden-sky {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: 
+        radial-gradient(circle at 80% 20%, rgba(255,255,100,0.8) 0%, transparent 20%),
+        radial-gradient(circle at 75% 15%, #FFD700 0%, transparent 8%);
+}
+#gardenScreen .garden-sun {
+    position: absolute;
+    top: 8%; right: 12%;
+    width: 60px; height: 60px;
+    background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, transparent 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 40px #FFD700, 0 0 80px rgba(255,215,0,0.5);
+    animation: sunPulse 3s ease-in-out infinite;
+}
+@keyframes sunPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+#gardenScreen .garden-fence {
+    position: absolute;
+    bottom: 10%; left: 0; right: 0;
+    height: 80px;
+    background: 
+        repeating-linear-gradient(90deg, 
+            #8B4513 0px, #8B4513 15px, 
+            transparent 15px, transparent 30px);
+    opacity: 0.4;
+}
+#gardenScreen .garden-flowers {
+    position: absolute;
+    bottom: 5%; left: 0; right: 0;
+    height: 50px;
+    background: 
+        radial-gradient(circle 8px at 10% 80%, #FF69B4 0%, transparent 100%),
+        radial-gradient(circle 6px at 25% 85%, #FFD700 0%, transparent 100%),
+        radial-gradient(circle 7px at 45% 75%, #FF6347 0%, transparent 100%),
+        radial-gradient(circle 5px at 65% 88%, #FF69B4 0%, transparent 100%),
+        radial-gradient(circle 8px at 85% 82%, #FFD700 0%, transparent 100%);
+}
+#gardenScreen .garden-butterflies {
+    position: absolute;
+    top: 20%; left: 0; right: 0;
+    height: 100px;
+    background: 
+        radial-gradient(circle 3px at 15% 50%, #87CEEB 0%, transparent 100%),
+        radial-gradient(circle 4px at 35% 30%, #FFB6C1 0%, transparent 100%),
+        radial-gradient(circle 3px at 55% 60%, #87CEEB 0%, transparent 100%),
+        radial-gradient(circle 4px at 75% 40%, #FFB6C1 0%, transparent 100%);
+    animation: flutter 5s ease-in-out infinite;
+}
+@keyframes flutter {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(20px) translateY(-10px); }
+}
+
+.seed-info, .coin-info {
+    font-size: 20px;
+    color: #2E7D32;
+    background: rgba(255,255,255,0.85);
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.garden-grid { 
+    display: grid; 
+    grid-template-columns: repeat(5, 85px); 
+    gap: 12px; 
+    margin-bottom: 20px;
+}
+.garden-slot {
+    width: 85px; height: 85px;
+    background: linear-gradient(180deg, #5d4037 0%, #3e2723 100%);
+    border: 3px solid #8B4513;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+.garden-slot:hover { border-color: #FFD700; transform: scale(1.05); }
+.garden-slot.has-plant { background: linear-gradient(180deg, #4a7c23 0%, #3d6b1c 100%); }
+.garden-slot .rarity { font-size: 10px; margin-top: 3px; font-weight: bold; }
+.garden-slot .rarity.common { color: #90EE90; }
+.garden-slot .rarity.rare { color: #4FC3F7; }
+.garden-slot .rarity.epic { color: #CE93D8; }
+.garden-slot.locked-slot {
+    background: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
+    border-color: #555;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.garden-slot.locked-slot:hover { 
+    border-color: #555; 
+    transform: none; 
+}
+
+/* ============ 商店 - 神秘商店 ============ */
+#shopScreen .shop-bg {
+    background: linear-gradient(180deg, 
+        #1a0a2e 0%, 
+        #2d1b4e 25%,
+        #4a1a6b 50%,
+        #2d1b4e 75%,
+        #0d0518 100%);
+}
+#shopScreen .shop-shelf {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, transparent 0%, rgba(139, 69, 19, 0.3) 100%);
+}
+#shopScreen .shop-orbs {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(circle 50px at 15% 30%, rgba(138, 43, 226, 0.4) 0%, transparent 100%),
+        radial-gradient(circle 40px at 85% 25%, rgba(0, 191, 255, 0.4) 0%, transparent 100%),
+        radial-gradient(circle 60px at 50% 70%, rgba(255, 215, 0, 0.3) 0%, transparent 100%);
+    animation: orbGlow 4s ease-in-out infinite alternate;
+}
+@keyframes orbGlow {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+#shopScreen .shop-curtain {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 15%;
+    background: linear-gradient(180deg, rgba(139, 69, 19, 0.4) 0%, transparent 100%);
+}
+#shopScreen .shop-mist {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 30%;
+    background: linear-gradient(180deg, transparent 0%, rgba(75, 0, 130, 0.2) 100%);
+}
+
+.shop-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 140px); 
+    gap: 12px; 
+    margin-bottom: 20px;
+}
+.shop-item {
+    background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
+    border: 2px solid #718096;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.shop-item:hover { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+.shop-item.owned { border-color: #4CAF50; background: linear-gradient(180deg, #2d5016 0%, #1a472a 100%); }
+.shop-item.active { border-color: #FFD700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+.shop-item .price { color: #FFD700; font-weight: bold; margin-top: 8px; font-size: 15px; }
+
+/* ============ 图鉴 - 古老图书馆 ============ */
+#almanacScreen .library-bg {
+    background: linear-gradient(180deg, 
+        #2c1810 0%, 
+        #4a2c17 25%,
+        #3d2817 50%,
+        #2c1810 75%,
+        #1a0f08 100%);
+}
+#almanacScreen .library-books {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        linear-gradient(90deg, rgba(139, 69, 19, 0.3) 0%, transparent 8%, transparent 92%, rgba(139, 69, 19, 0.3) 100%),
+        repeating-linear-gradient(180deg, 
+            transparent 0px, transparent 80px, 
+            rgba(160, 82, 45, 0.15) 80px, rgba(160, 82, 45, 0.15) 85px,
+            transparent 85px, transparent 120px,
+            rgba(139, 69, 19, 0.1) 120px, rgba(139, 69, 19, 0.1) 125px);
+}
+#almanacScreen .library-candles {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(ellipse 100px 150px at 25% 50%, rgba(255, 165, 0, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 80px 130px at 75% 50%, rgba(255, 140, 0, 0.1) 0%, transparent 70%);
+    animation: flicker 2s ease-in-out infinite;
+}
+@keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+#almanacScreen .library-dust {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='20' cy='30' r='1' fill='%23D2B48C' opacity='0.3'/%3E%3Ccircle cx='80' cy='70' r='1' fill='%23D2B48C' opacity='0.3'/%3E%3C/svg%3E");
+    background-size: 150px 150px;
+    animation: dust 20s linear infinite;
+}
+@keyframes dust {
+    0% { background-position: 0 0; }
+    100% { background-position: 150px 150px; }
+}
+
+.almanac-tabs { display: flex; gap: 15px; margin-bottom: 25px; }
+.tab-btn {
+    padding: 12px 28px;
+    background: linear-gradient(180deg, #5d4037 0%, #3e2723 100%);
+    border: 2px solid #8B4513;
+    border-radius: 10px;
+    color: #D2B48C;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+.tab-btn:hover { background: linear-gradient(180deg, #6d5047 0%, #4e3733 100%); }
+.tab-btn.active { 
+    background: linear-gradient(180deg, #8B4513 0%, #654321 100%); 
+    color: #FFD700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.almanac-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 100px); 
+    gap: 15px; 
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 10px;
+}
+.almanac-item {
+    background: linear-gradient(180deg, #3d2817 0%, #2c1810 100%);
+    border: 2px solid #5d4037;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.almanac-item:hover { border-color: #FFD700; }
+.almanac-item.locked { opacity: 0.5; }
+.almanac-item .item-icon { font-size: 36px; }
+.almanac-item .item-name { font-size: 11px; color: #D2B48C; margin-top: 6px; }
+
+.almanac-detail {
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(180deg, #3d2817 0%, #2c1810 100%);
+    border: 2px solid #5d4037;
+    border-radius: 12px;
+    max-width: 450px;
+}
+.almanac-detail .detail-icon { font-size: 50px; text-align: center; }
+.almanac-detail .detail-name { font-size: 20px; color: #FFD700; text-align: center; margin: 12px 0; }
+.almanac-detail .detail-desc { font-size: 14px; color: #D2B48C; line-height: 1.6; }
+
+/* ============ 植物选择 - 温室 ============ */
+#plantSelectScreen .greenhouse-bg {
+    background: linear-gradient(180deg, 
+        #c8e6c9 0%, 
+        #a5d6a7 25%,
+        #81c784 50%,
+        #66bb6a 75%,
+        #4caf50 100%);
+}
+#plantSelectScreen .greenhouse-glass {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%),
+        linear-gradient(45deg, transparent 50%, rgba(255,255,255,0.1) 100%);
+}
+#plantSelectScreen .greenhouse-plants {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: 
+        radial-gradient(ellipse 60px 40px at 10% 90%, rgba(34, 139, 34, 0.3) 0%, transparent 100%),
+        radial-gradient(ellipse 50px 35px at 30% 85%, rgba(34, 139, 34, 0.25) 0%, transparent 100%),
+        radial-gradient(ellipse 70px 45px at 70% 95%, rgba(34, 139, 34, 0.3) 0%, transparent 100%),
+        radial-gradient(ellipse 55px 38px at 90% 88%, rgba(34, 139, 34, 0.2) 0%, transparent 100%);
+}
+#plantSelectScreen .greenhouse-light {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(ellipse 200px 150px at 30% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 180px 120px at 70% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+}
+
+.select-info {
+    font-size: 20px;
+    color: #1B5E20;
+    background: rgba(255,255,255,0.85);
+    padding: 10px 25px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.plant-select-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 100px); 
+    gap: 15px; 
+    margin-bottom: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+}
+.plant-select-grid .shop-item.selected { 
+    border-color: #FFD700; 
+    box-shadow: 0 0 15px #FFD700;
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
+}
+
+.confirm-btn {
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%) !important;
+    border-color: #1B5E20 !important;
+}
+
+/* ============ 胜利 - 庆典 ============ */
+#victoryScreen .celebration-bg {
+    background: linear-gradient(180deg, 
+        #FFD700 0%, 
+        #FFA500 30%,
+        #FF8C00 50%,
+        #FF6347 70%,
+        #FF4500 100%);
+    animation: bgPulse 2s ease-in-out infinite;
+}
+@keyframes bgPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.1); }
+}
+#victoryScreen .celebration-fireworks {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 20%, #FF69B4 0%, transparent 15%),
+        radial-gradient(circle at 80% 15%, #00CED1 0%, transparent 15%),
+        radial-gradient(circle at 15% 60%, #9400D3 0%, transparent 20%),
+        radial-gradient(circle at 85% 55%, #32CD32 0%, transparent 15%),
+        radial-gradient(circle at 50% 80%, #FFD700 0%, transparent 20%);
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+@keyframes sparkle {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+#victoryScreen .celebration-confetti {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='20' y='10' width='4' height='8' fill='%23FF69B4' opacity='0.6'/%3E%3Crect x='50' y='20' width='4' height='8' fill='%2300CED1' opacity='0.6'/%3E%3Crect x='80' y='15' width='4' height='8' fill='%23FFD700' opacity='0.6'/%3E%3Crect x='30' y='70' width='4' height='8' fill='%2332CD32' opacity='0.6'/%3E%3Crect x='70' y='80' width='4' height='8' fill='%239400D3' opacity='0.6'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    animation: confettiFall 8s linear infinite;
+}
+@keyframes confettiFall {
+    0% { background-position: 0 0; }
+    100% { background-position: 200px 400px; }
+}
+#victoryScreen .celebration-stars {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,5 52,15 62,15 54,22 57,32 50,26 43,32 46,22 38,15 48,15' fill='%23fff' opacity='0.4'/%3E%3Cpolygon points='25,35 26,40 31,40 27,43 28,48 25,45 22,48 23,43 19,40 24,40' fill='%23fff' opacity='0.3'/%3E%3Cpolygon points='75,50 76,55 81,55 77,58 78,63 75,60 72,63 73,58 69,55 74,55' fill='%23fff' opacity='0.3'/%3E%3C/svg%3E");
+    background-size: 150px 150px;
+}
+
+.victory-stars {
+    font-size: 56px;
+    margin: 25px 0;
+    animation: bounce 1s ease-in-out infinite;
+}
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+.victory-msg {
+    font-size: 24px;
+    color: #fff;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.victory-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.action-btn {
+    padding: 14px 35px;
     font-size: 20px;
     font-weight: bold;
     color: white;
-    background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+    background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 100%);
     border: 3px solid #1B5E20;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
-    position: relative;
-    z-index: 1;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-.menuBtn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
-
-/* 面板样式 - 各模块独特背景 */
-#levelSelectPanel, #settingsPanel, #gardenPanel, #shopPanel, #almanacPanel, #plantSelectPanel, #victoryPanel {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    padding: 30px 40px;
-    border-radius: 15px;
-    display: none;
-    z-index: 250;
-    max-height: 90vh;
-    overflow-y: auto;
+.action-btn:hover { 
+    transform: scale(1.05); 
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-/* 关卡选择 - 地图主题 */
-#levelSelectPanel { 
-    background: linear-gradient(180deg, #2d1810 0%, #4a2c17 50%, #1a0f08 100%); 
-    border: 3px solid #8B4513; 
-}
-
-/* 设置面板 - 科技主题 */
-#settingsPanel { 
-    background: linear-gradient(180deg, #1a237e 0%, #283593 50%, #0d1442 100%); 
-    border: 3px solid #3f51b5; 
-}
-
-/* 花园面板 - 自然主题 */
-#gardenPanel { 
-    background: linear-gradient(180deg, #1b5e20 0%, #2e7d32 50%, #0d3310 100%); 
-    border: 3px solid #4caf50; 
-}
-
-/* 商店面板 - 神秘主题 */
-#shopPanel { 
-    background: linear-gradient(180deg, #4a148c 0%, #6a1b9a 50%, #2a0a4c 100%); 
-    border: 3px solid #9c27b0; 
-}
-
-/* 图鉴面板 - 古籍主题 */
-#almanacPanel { 
-    background: linear-gradient(180deg, #bf360c 0%, #e64a19 50%, #5c1a06 100%); 
-    border: 3px solid #ff5722; 
-}
-
-/* 植物选择面板 - 策略主题 */
-#plantSelectPanel { 
-    background: linear-gradient(180deg, #004d40 0%, #00695c 50%, #00201a 100%); 
-    border: 3px solid #009688; 
-}
-
-/* 胜利面板 - 庆典主题 */
-#victoryPanel { 
-    background: linear-gradient(180deg, #f57f17 0%, #ff9800 50%, #e65100 100%); 
-    border: 3px solid #ffc107; 
-}
-
-#levelSelectPanel h2, #settingsPanel h2, #gardenPanel h2, #shopPanel h2, #almanacPanel h2, #plantSelectPanel h2, #victoryPanel h2 { 
-    text-align: center; margin-bottom: 20px; color: #FFD700; 
-}
-
-.levelGrid { display: grid; grid-template-columns: repeat(5, 80px); gap: 15px; margin-top: 20px; }
-
-.levelBtn {
-    width: 80px; height: 80px;
-    background: linear-gradient(to bottom, #4CAF50, #2E7D32);
-    border: 3px solid #1B5E20;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-}
-.levelBtn:hover { transform: scale(1.1); }
-.levelBtn.locked { background: linear-gradient(to bottom, #616161, #424242); cursor: not-allowed; }
-.levelBtn.locked::after { content: '🔒'; font-size: 16px; }
-.levelBtn.completed { background: linear-gradient(to bottom, #FFD700, #DAA520); border-color: #B8860B; }
-.levelBtn .stars { font-size: 12px; margin-top: 2px; }
-
-.settingRow { display: flex; justify-content: space-between; align-items: center; margin: 15px 0; }
-.settingRow label { font-size: 16px; }
-.settingRow input[type="range"] { width: 150px; }
-
-.closeBtn {
-    display: block;
-    width: 100%;
-    margin-top: 20px;
-    padding: 10px;
-    font-size: 16px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#pauseMenu {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 40px 50px;
-    border-radius: 15px;
-    display: none;
-    z-index: 200;
-    text-align: center;
-}
-#pauseMenu h2 { font-size: 32px; margin-bottom: 20px; }
-
+/* ============ 弹窗 ============ */
 #gameMenu {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.9);
-    color: white;
-    padding: 40px 60px;
+    background: linear-gradient(180deg, #2d5016 0%, #1a472a 100%);
+    border: 4px solid #4CAF50;
     border-radius: 20px;
+    padding: 40px 60px;
     text-align: center;
-    display: none;
     z-index: 100;
+    display: none;
 }
-#gameMenu h1 { font-size: 36px; margin-bottom: 20px; }
-#gameMenu p { font-size: 18px; margin-bottom: 20px; }
-#gameMenu button { background: linear-gradient(to bottom, #4caf50, #2e7d32); color: white; border: none; padding: 15px 40px; font-size: 20px; border-radius: 10px; cursor: pointer; margin: 5px; }
+#gameMenu h1 { font-size: 36px; color: #FFD700; margin-bottom: 15px; }
+#gameMenu p { font-size: 18px; color: #90EE90; margin-bottom: 25px; }
+#gameMenu button { 
+    background: linear-gradient(180deg, #4caf50 0%, #2e7d32 100%); 
+    color: white; 
+    border: 2px solid #1B5E20;
+    padding: 14px 50px; 
+    font-size: 20px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: all 0.2s;
+}
+#gameMenu button:hover { transform: scale(1.05); }
 
 #newPlantReward {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(to bottom, #2d5016, #1a472a);
+    background: linear-gradient(180deg, #2d5016 0%, #1a472a 100%);
     border: 4px solid #FFD700;
     border-radius: 20px;
     padding: 40px;
     text-align: center;
+    z-index: 200;
     display: none;
-    z-index: 300;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
 }
 #newPlantReward h2 { color: #FFD700; font-size: 28px; margin-bottom: 20px; }
-#newPlantReward .plantIcon { font-size: 80px; margin: 20px 0; }
-#newPlantReward .plantName { color: #90EE90; font-size: 24px; margin-bottom: 20px; }
-#newPlantReward button { background: #FFD700; color: #1a472a; border: none; padding: 15px 40px; font-size: 18px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-
-/* 花园样式 */
-#gardenPanel .gardenGrid { display: grid; grid-template-columns: repeat(5, 80px); gap: 10px; margin-top: 20px; }
-.gardenSlot {
-    width: 80px; height: 80px;
-    background: linear-gradient(to bottom, #5d4037, #3e2723);
-    border: 2px solid #8B4513;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+#newPlantReward .plant-icon { font-size: 80px; margin: 20px 0; }
+#newPlantReward .plant-name { color: #90EE90; font-size: 24px; margin-bottom: 20px; }
+#newPlantReward button { 
+    background: #FFD700; 
+    color: #1a472a; 
+    border: none; 
+    padding: 14px 40px; 
+    font-size: 18px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    font-weight: bold;
+    transition: all 0.2s;
 }
-.gardenSlot:hover { border-color: #FFD700; }
-.gardenSlot.hasPlant { background: linear-gradient(to bottom, #4a7c23, #3d6b1c); }
-.gardenSlot .rarity { font-size: 10px; margin-top: 2px; }
-.gardenSlot .rarity.common { color: #90EE90; }
-.gardenSlot .rarity.rare { color: #4FC3F7; }
-.gardenSlot .rarity.epic { color: #CE93D8; }
+#newPlantReward button:hover { transform: scale(1.05); }
 
-/* 商店样式 */
-#shopPanel .shopGrid { display: grid; grid-template-columns: repeat(3, 150px); gap: 15px; margin-top: 20px; }
-.shopItem {
-    background: linear-gradient(to bottom, #4a5568, #2d3748);
-    border: 2px solid #718096;
-    border-radius: 10px;
-    padding: 10px;
+#pauseMenu {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.92);
+    border: 3px solid #4CAF50;
+    border-radius: 18px;
+    padding: 35px 45px;
     text-align: center;
-    cursor: pointer;
-}
-.shopItem:hover { border-color: #FFD700; }
-.shopItem.owned { border-color: #4CAF50; background: linear-gradient(to bottom, #2d5016, #1a472a); }
-.shopItem.active { border-color: #FFD700; box-shadow: 0 0 10px #FFD700; }
-.shopItem .price { color: #FFD700; font-weight: bold; margin-top: 5px; }
-
-.seedCount { color: #90EE90; margin-top: 10px; text-align: center; }
-
-/* 图鉴样式 */
-#almanacPanel .almanacTabs { display: flex; gap: 10px; margin-bottom: 20px; }
-.almanacTab {
-    padding: 10px 20px;
-    background: #4a5568;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-}
-.almanacTab.active { background: #4CAF50; }
-#almanacPanel .almanacGrid { display: grid; grid-template-columns: repeat(4, 120px); gap: 15px; }
-.almanacItem {
-    background: #374151;
-    border: 2px solid #4B5563;
-    border-radius: 10px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-}
-.almanacItem.locked { background: #1F2937; border-color: #374151; }
-.almanacItem.locked .itemIcon { filter: brightness(0.3); }
-.almanacItem .itemIcon { font-size: 40px; }
-.almanacItem .itemName { font-size: 12px; margin-top: 5px; }
-.almanacDetail {
+    z-index: 100;
     display: none;
-    margin-top: 20px;
-    padding: 20px;
-    background: #1F2937;
-    border-radius: 10px;
 }
-.almanacDetail .detailIcon { font-size: 60px; text-align: center; }
-.almanacDetail .detailName { font-size: 20px; color: #FFD700; text-align: center; margin: 10px 0; }
-.almanacDetail .detailDesc { font-size: 14px; color: #9CA3AF; line-height: 1.6; }
-
-/* 植物选择面板 */
-#plantSelectPanel .shopGrid { display: grid; grid-template-columns: repeat(4, 100px); gap: 15px; margin-top: 20px; }
-#plantSelectPanel .shopItem.selected { border-color: #FFD700; box-shadow: 0 0 15px #FFD700; }
+#pauseMenu h2 { font-size: 32px; color: #FFD700; margin-bottom: 25px; }
+#pauseMenu .menu-btn { 
+    width: 240px; 
+    padding: 12px 20px; 
+    margin: 8px 0;
+    font-size: 18px; 
+}
