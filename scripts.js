@@ -9,7 +9,7 @@ class SoundManager {
         this.bgmFiles = {
             menu: 'resources/main_background.mp3',
             select: 'resources/fight_prepare.mp3',
-            battle: 'resources/fight.html',
+            battle: 'resources/fight.mp3',
             garden: 'resources/garden.mp3'
         };
 
