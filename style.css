@@ -1,3 +1,75 @@
+/* ============ 横屏提示 ============ */
+#orientationOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.orientation-content {
+    text-align: center;
+    color: #fff;
+}
+
+.phone-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: phoneShake 1s ease-in-out infinite;
+}
+
+.rotate-icon {
+    font-size: 80px;
+    color: #FFD700;
+    animation: rotatePhone 2s ease-in-out infinite;
+    display: inline-block;
+}
+
+.orientation-content p {
+    font-size: 24px;
+    margin-top: 30px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.orientation-content .sub-text {
+    font-size: 14px;
+    margin-top: 10px;
+    opacity: 0.7;
+    font-weight: normal;
+}
+
+@keyframes phoneShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
+@keyframes rotatePhone {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* 横屏模式显示 - 仅在移动设备竖屏时显示 */
+@media screen and (orientation: portrait) and (max-width: 1024px) {
+    #orientationOverlay {
+        display: flex !important;
+    }
+}
+
+/* 横屏手机适配 - 确保游戏正常显示 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    #orientationOverlay {
+        display: none !important;
+    }
+}
+
 * { 
     margin: 0; padding: 0; box-sizing: border-box; 
     user-select: none;
@@ -1139,4 +1211,461 @@ body {
     padding: 12px 20px; 
     margin: 8px 0;
     font-size: 18px; 
+}
+
+/* ============ 响应式布局 ============ */
+@media screen and (max-width: 768px) {
+    /* 基础调整 */
+    body {
+        font-size: 14px;
+    }
+
+    /* 游戏容器 */
+    #gameContainer {
+        width: 100vw;
+        height: 100vh;
+    }
+
+    /* 主菜单 */
+    .game-title {
+        font-size: 32px;
+        margin-bottom: 30px;
+    }
+
+    .game-title::before,
+    .game-title::after {
+        display: none;
+    }
+
+    .menu-buttons {
+        gap: 10px;
+    }
+
+    .menu-btn {
+        width: 220px;
+        padding: 12px 25px;
+        font-size: 18px;
+    }
+
+    .corner-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    /* 战斗界面 */
+    #topBar {
+        height: 55px;
+        padding: 0 10px;
+    }
+
+    #sunCounter,
+    #coinCounter {
+        font-size: 14px;
+        padding: 6px 10px;
+        min-width: 60px;
+    }
+
+    #shovelBtn {
+        width: 35px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    #plantCards {
+        gap: 3px;
+    }
+
+    .plantCard {
+        min-width: 45px;
+        height: 50px;
+    }
+
+    .plantCard .cost {
+        font-size: 8px;
+    }
+
+    .ctrlBtn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    #waveInfo,
+    #levelInfo {
+        font-size: 12px;
+        padding: 6px 10px;
+        top: 60px;
+    }
+
+    #countdownDisplay {
+        margin-top: 35px;
+        padding: 8px 15px;
+    }
+
+    #countdownDisplay .countdownTimer {
+        font-size: 22px;
+    }
+
+    /* 场景内容 */
+    .scene-content {
+        padding: 15px;
+    }
+
+    .scene-content h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    /* 关卡选择 */
+    .level-grid {
+        grid-template-columns: repeat(3, 65px);
+        gap: 12px;
+    }
+
+    .level-btn {
+        width: 65px;
+        height: 65px;
+        font-size: 20px;
+    }
+
+    .level-btn .stars {
+        font-size: 10px;
+    }
+
+    /* 设置 */
+    .settings-box {
+        padding: 15px 20px;
+    }
+
+    .setting-item {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .setting-item label {
+        font-size: 14px;
+    }
+
+    .setting-item input[type="range"] {
+        width: 150px;
+    }
+
+    /* 花园 */
+    .garden-grid {
+        grid-template-columns: repeat(3, 65px);
+        gap: 8px;
+    }
+
+    .garden-slot {
+        width: 65px;
+        height: 65px;
+    }
+
+    .seed-info,
+    .coin-info {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+
+    /* 商店 */
+    .shop-grid {
+        grid-template-columns: repeat(2, 100px);
+        gap: 8px;
+    }
+
+    .shop-item {
+        padding: 10px;
+    }
+
+    .shop-item .price {
+        font-size: 12px;
+    }
+
+    /* 图鉴 */
+    .almanac-tabs {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .tab-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .almanac-grid {
+        grid-template-columns: repeat(3, 70px);
+        gap: 10px;
+        max-height: 200px;
+    }
+
+    .almanac-item {
+        padding: 8px;
+    }
+
+    .almanac-item .item-icon {
+        font-size: 28px;
+    }
+
+    .almanac-item .item-name {
+        font-size: 9px;
+    }
+
+    .almanac-detail {
+        padding: 12px;
+        max-width: 300px;
+    }
+
+    .almanac-detail .detail-icon {
+        font-size: 36px;
+    }
+
+    .almanac-detail .detail-name {
+        font-size: 16px;
+    }
+
+    .almanac-detail .detail-desc {
+        font-size: 12px;
+    }
+
+    /* 植物选择 */
+    .plant-select-grid {
+        grid-template-columns: repeat(3, 75px);
+        gap: 10px;
+        max-height: 200px;
+    }
+
+    .select-info {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+
+    /* 胜利界面 */
+    .victory-stars {
+        font-size: 36px;
+    }
+
+    .victory-msg {
+        font-size: 16px;
+    }
+
+    .victory-btns {
+        gap: 8px;
+    }
+
+    .action-btn {
+        padding: 10px 25px;
+        font-size: 16px;
+    }
+
+    /* 弹窗 */
+    #gameMenu {
+        padding: 25px 35px;
+    }
+
+    #gameMenu h1 {
+        font-size: 24px;
+    }
+
+    #gameMenu p {
+        font-size: 14px;
+    }
+
+    #gameMenu button {
+        padding: 10px 30px;
+        font-size: 16px;
+    }
+
+    #newPlantReward {
+        padding: 25px;
+    }
+
+    #newPlantReward h2 {
+        font-size: 20px;
+    }
+
+    #newPlantReward .plant-icon {
+        font-size: 50px;
+    }
+
+    #newPlantReward .plant-name {
+        font-size: 18px;
+    }
+
+    #pauseMenu {
+        padding: 20px 25px;
+    }
+
+    #pauseMenu h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    #pauseMenu .menu-btn {
+        width: 180px;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .back-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* 更小屏幕 */
+@media screen and (max-width: 480px) {
+    .game-title {
+        font-size: 26px;
+    }
+
+    .menu-btn {
+        width: 180px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+
+    .level-grid {
+        grid-template-columns: repeat(2, 60px);
+        gap: 8px;
+    }
+
+    .level-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
+    }
+
+    .shop-grid {
+        grid-template-columns: repeat(2, 85px);
+    }
+
+    .garden-grid {
+        grid-template-columns: repeat(2, 60px);
+    }
+
+    .garden-slot {
+        width: 60px;
+        height: 60px;
+    }
+
+    .almanac-grid {
+        grid-template-columns: repeat(2, 65px);
+    }
+}
+
+/* 横屏手机适配 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    #gameContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .game-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .menu-buttons {
+        flex-direction: row;
+        gap: 10px;
+    }
+
+    .menu-btn {
+        width: 140px;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .corner-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .corner-btn.btn-almanac {
+        top: 10px;
+        right: 10px;
+    }
+
+    .corner-btn.btn-settings {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .scene-content {
+        padding: 10px;
+    }
+
+    .scene-content h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .level-grid {
+        grid-template-columns: repeat(5, 50px);
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .level-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+    }
+
+    #topBar {
+        height: 45px;
+    }
+
+    #sunCounter,
+    #coinCounter {
+        font-size: 12px;
+        padding: 4px 8px;
+        min-width: 50px;
+    }
+
+    #shovelBtn {
+        width: 30px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .plantCard {
+        min-width: 40px;
+        height: 45px;
+    }
+
+    #waveInfo,
+    #levelInfo {
+        font-size: 10px;
+        padding: 4px 8px;
+        top: 50px;
+    }
+
+    .garden-grid,
+    .shop-grid,
+    .almanac-grid,
+    .plant-select-grid {
+        max-height: 120px;
+    }
+
+    .back-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+        margin-top: 10px;
+    }
+
+    .settings-box {
+        padding: 10px 15px;
+    }
+
+    .setting-item label {
+        font-size: 12px;
+    }
+
+    .setting-item input[type="range"] {
+        width: 100px;
+    }
 }

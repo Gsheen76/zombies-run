@@ -3,11 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>僵尸快跑 | Zombies Run</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
-</head>
+<div id="orientationOverlay" style="display: none;">
+    <div class="orientation-content">
+        <div class="phone-icon">📱</div>
+        <div class="rotate-icon">↻</div>
+        <p>请将设备旋转至横屏</p>
+        <p class="sub-text">Please rotate your device to landscape</p>
+    </div>
+</div>
 
 <body>
     <div id="gameContainer">

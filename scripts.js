@@ -199,7 +199,24 @@ class Game {
         this.initGrid();
         this.initUI();
         this.setupEventListeners();
+        this.initOrientationHandler();
         this.showMainMenu();
+    }
+
+    initOrientationHandler() {
+        const overlay = document.getElementById('orientationOverlay');
+        
+        const checkOrientation = () => {
+            if (window.innerHeight > window.innerWidth) {
+                overlay.style.display = 'flex';
+            } else {
+                overlay.style.display = 'none';
+            }
+        };
+        
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        checkOrientation();
     }
 
     loadProgress() {
