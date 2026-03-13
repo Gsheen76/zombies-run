@@ -1,0 +1,23 @@
+{
+  "name": "zombies-run",
+  "version": "1.0.0",
+  "description": "- **冒险模式**：10个关卡，渐进难度，包含多波次僵尸进攻 - **花园系统**：种植养成，1小时成熟机制，随机稀有度（普通/稀有/史诗） - **商店系统**：购买植物皮肤、花园槽位、种子包、植物槽位 - **图鉴系统**：查看已解锁的植物和僵尸详情 - **设置系统**：背景音乐、音量控制",
+  "main": "scripts.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gsheen76/zombies-run.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gsheen76/zombies-run/issues"
+  },
+  "homepage": "https://github.com/Gsheen76/zombies-run#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0",
+    "http-server": "^14.1.1"
+  }
+}
